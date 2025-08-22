@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RPG de Produtividade</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #001f3f;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            width: 100vw;
+        }
+        body.light-theme {
+            background-color: #f4f7fa;
+            color: #000;
+        }
+        header {
+            background-color: #000f1f;
+            color: white;
+            width: 100%;
+            padding: 15px 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+        body.light-theme header {
+            background-color: #e6f0fa;
+            color: #000;
+        }
+        .header-icon {
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            cursor: pointer;
+            color: #ffd700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            transition: transform 0.5s;
+        }
+        body.light-theme .header-icon {
+            color: #007bff;
+        }
+        .header-icon:hover {
+            transform: rotate(360deg);
+        }
+        .icons {
+            display: flex;
+            gap: clamp(5px, 1.5vw, 8px);
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .icon-btn {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: clamp(5px, 1.2vw, 7px) clamp(10px, 2vw, 12px);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
+            font-size: clamp(9px, 2vw, 11px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: clamp(3px, 0.8vw, 4px);
+            white-space: nowrap;
+        }
+        .icon-btn i {
+            font-size: clamp(9px, 2vw, 12px);
+        }
+        body.light-theme .icon-btn {
+            background: linear-gradient(135deg, #0056b3, #003d80);
+        }
+        .icon-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        .theme-btn {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: clamp(5px, 1.2vw, 7px);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.5s, background 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .theme-btn i {
+            font-size: clamp(9px, 2vw, 12px);
+        }
+        .theme-btn:hover {
+            background: linear-gradient(135deg, #0056b3, #003d80);
+            transform: rotate(360deg);
+        }
+        body.light-theme .theme-btn {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+        }
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: #ffd700;
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            cursor: pointer;
+        }
+        body.light-theme .menu-toggle {
+            color: #007bff;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: clamp(200px, 80vw, 250px);
+            height: 100%;
+            background: #000f1f;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+            transition: right 0.3s ease-in-out;
+            z-index: 1000;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+        }
+        body.light-theme .sidebar {
+            background: #e6f0fa;
+        }
+        .sidebar.open {
+            right: 0;
+        }
+        .sidebar .icon-btn {
+            width: 100%;
+            justify-content: flex-start;
+            font-size: clamp(10px, 2.5vw, 12px);
+        }
+        .close-sidebar {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            padding: 6px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: clamp(10px, 2.5vw, 12px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        body.light-theme .close-sidebar {
+            background: linear-gradient(135deg, #c82333, #a71d2a);
+        }
+        .close-sidebar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 15px 10px;
+            background: #001f3f;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+            border: 2px solid #ffd700;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .container.visible {
+            opacity: 1;
+        }
+        body.light-theme .container {
+            background: #fff;
+            border: 2px solid #007bff;
+        }
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                margin: 10px 5px;
+                padding: 10px;
+            }
+        }
+        .landing-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            width: 100%;
+            background: linear-gradient(45deg, #4b0082, #8a2be2, #007bff, #001f3f);
+            background-size: 400%;
+            animation: gradient 15s ease infinite;
+            padding: 10px;
+        }
+        body.light-theme .landing-page {
+            background: linear-gradient(45deg, #007bff, #0056b3, #e6f0fa, #d9e7f7);
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .landing-content {
+            background: #001f3f;
+            padding: clamp(20px, 5vw, 30px);
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.5);
+            border: 2px solid #ffd700;
+            text-align: center;
+            animation: fadeIn 1s ease-in;
+            width: 100%;
+            max-width: 500px;
+        }
+        body.light-theme .landing-content {
+            background: #fff;
+            border: 2px solid #007bff;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .landing-content h1 {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            margin-bottom: 8px;
+        }
+        .landing-content p {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            margin-bottom: 15px;
+        }
+        .start-tasks-btn {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
+            border: none;
+            padding: clamp(10px, 2.5vw, 12px) clamp(20px, 4vw, 25px);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: clamp(12px, 2.5vw, 14px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+            animation: pulse 2s infinite;
+            width: fit-content;
+            margin: 0 auto;
+        }
+        body.light-theme .start-tasks-btn {
+            background: linear-gradient(135deg, #1e7e34, #155724);
+        }
+        .start-tasks-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @media (max-width: 480px) {
+            .landing-content {
+                padding: 15px;
+            }
+            .landing-content h1 {
+                font-size: clamp(1.2rem, 3.5vw, 1.6rem);
+            }
+            .landing-content p {
+                font-size: clamp(0.8rem, 2vw, 0.9rem);
+            }
+            .start-tasks-btn {
+                padding: clamp(8px, 2vw, 10px) clamp(15px, 3.5vw, 20px);
+                font-size: clamp(11px, 2.2vw, 13px);
+            }
+        }
+        .score-section, .settings-section, .tasks-section, .history-section, .main-menu {
+            display: none;
+        }
+        .back-btn {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            padding: clamp(5px, 1.2vw, 7px) clamp(10px, 2vw, 12px);
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 8px 0;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-size: clamp(10px, 2.5vw, 12px);
+        }
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        .clear-cache-btn {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            padding: clamp(5px, 1.2vw, 7px) clamp(10px, 2vw, 12px);
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 8px 0;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: clamp(10px, 2.5vw, 12px);
+        }
+        .clear-cache-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        .reset-btn, .save-settings-btn {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
+            border: none;
+            padding: clamp(8px, 2vw, 10px) clamp(15px, 3.5vw, 20px);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-size: clamp(10px, 2.5vw, 12px);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            justify-content: center;
+        }
+        body.light-theme .reset-btn, body.light-theme .save-settings-btn {
+            background: linear-gradient(135deg, #1e7e34, #155724);
+        }
+        .reset-btn:hover, .save-settings-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        .form-container {
+            border: 2px solid #ffd700;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+        body.light-theme .form-container {
+            border: 2px solid #007bff;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            font-weight: bold;
+            text-align: center;
+            font-size: clamp(11px, 2.5vw, 13px);
+        }
+        .form-group input, .form-group select {
+            padding: 5px;
+            font-size: clamp(10px, 2.2vw, 12px);
+            border-radius: 5px;
+            border: 1px solid #ffd700;
+            background: #002a5c;
+            color: #fff;
+            width: 100%;
+            max-width: 280px;
+            margin: 0 auto;
+        }
+        body.light-theme .form-group input, body.light-theme .form-group select {
+            background: #e6f0fa;
+            color: #000;
+            border: 1px solid #007bff;
+        }
+        .form-group button {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-size: clamp(10px, 2.5vw, 12px);
+            margin: 8px auto;
+            display: block;
+        }
+        .form-group button:hover {
+            background: linear-gradient(135deg, #0056b3, #003d80);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        body.light-theme .form-group button {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+        }
+        .attribute-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: clamp(6px, 1.5vw, 8px);
+            justify-content: center;
+            width: 100%;
+            margin: 8px auto;
+            padding: 0 clamp(8px, 1.5vw, 15px);
+        }
+        .attribute-btn {
+            background: linear-gradient(135deg, #002a5c, #001f3f);
+            color: #fff;
+            border: 2px solid #ffd700;
+            padding: clamp(6px, 1.5vw, 8px);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s, border-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(3px, 0.8vw, 4px);
+            font-size: clamp(10px, 2.2vw, 12px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            flex: 1;
+            min-width: clamp(90px, 18vw, 110px);
+            max-width: clamp(100px, 22vw, 130px);
+        }
+        .attribute-btn i {
+            font-size: clamp(10px, 2.5vw, 14px);
+        }
+        .attribute-btn.selected {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            border-color: #28a745;
+            transform: scale(1.05);
+        }
+        body.light-theme .attribute-btn {
+            background: linear-gradient(135deg, #e6f0fa, #d9e7f7);
+            color: #000;
+            border: 2px solid #007bff;
+        }
+        body.light-theme .attribute-btn.selected {
+            background: linear-gradient(135deg, #1e7e34, #155724);
+            border-color: #1e7e34;
+        }
+        .attribute-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+        }
+        .task-card {
+            background: linear-gradient(135deg, #002a5c, #001f3f);
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+            max-width: 300px;
+            font-size: clamp(9px, 2vw, 11px);
+            margin: 0 auto;
+        }
+        body.light-theme .task-card {
+            background: linear-gradient(135deg, #e6f0fa, #d9e7f7);
+        }
+        .task-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+        }
+        .task-card .icons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        .task-card .icons i {
+            cursor: pointer;
+            font-size: clamp(12px, 3vw, 14px);
+            color: #ffd700;
+            transition: color 0.2s;
+        }
+        .task-card .attributes {
+            display: flex;
+            gap: clamp(6px, 1.5vw, 8px);
+            flex-wrap: wrap;
+        }
+        .task-card .attributes i {
+            font-size: clamp(12px, 3vw, 14px);
+            color: #ffd700;
+        }
+        body.light-theme .task-card .attributes i, body.light-theme .task-card .icons i {
+            color: #007bff;
+        }
+        .task-card .icons i:hover {
+            color: #ff8c00;
+        }
+        body.light-theme .task-card .icons i:hover {
+            color: #0056b3;
+        }
+        .progress-bar {
+            margin: 8px 0;
+            width: 100%;
+        }
+        .progress-bar progress {
+            width: 100%;
+            height: 18px;
+        }
+        .missions-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            grid-column: span 2;
+            width: 100%;
+            overflow-y: auto;
+            max-height: 500px;
+            padding: 5px;
+            justify-content: center;
+        }
+        .missions-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+        .missions-grid::-webkit-scrollbar-track {
+            background: #001f3f;
+        }
+        body.light-theme .missions-grid::-webkit-scrollbar-track {
+            background: #e6f0fa;
+        }
+        .missions-grid::-webkit-scrollbar-thumb {
+            background: #ffd700;
+            border-radius: 4px;
+        }
+        body.light-theme .missions-grid::-webkit-scrollbar-thumb {
+            background: #007bff;
+        }
+        .mission-card {
+            background: linear-gradient(135deg, #002a5c, #001f3f);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            flex: 1 1 clamp(140px, 30vw, 160px);
+            text-align: center;
+            min-height: 180px;
+        }
+        body.light-theme .mission-card {
+            background: linear-gradient(135deg, #e6f0fa, #d9e7f7);
+        }
+        @media (max-width: 600px) {
+            .mission-card {
+                flex: 1 1 clamp(120px, 45vw, 140px);
+                min-height: 160px;
+            }
+        }
+        @media (max-width: 400px) {
+            .mission-card {
+                flex: 1 1 100%;
+                min-height: 140px;
+            }
+        }
+        .mission-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+        }
+        .mission-card .attributes {
+            display: flex;
+            gap: clamp(6px, 1.5vw, 8px);
+            justify-content: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .mission-card .attributes i {
+            font-size: clamp(10px, 2.5vw, 12px);
+            color: #ffd700;
+        }
+        body.light-theme .mission-card .attributes i {
+            color: #007bff;
+        }
+        .mission-card button {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: clamp(10px, 2.2vw, 11px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 4px;
+        }
+        body.light-theme .mission-card button {
+            background: linear-gradient(135deg, #1e7e34, #155724);
+        }
+        .mission-card button.cancel-btn {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+        body.light-theme .mission-card button.cancel-btn {
+            background: linear-gradient(135deg, #c82333, #a71d2a);
+        }
+        .mission-card button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .mission-card input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            max-width: 120px;
+            height: 6px;
+            background: linear-gradient(to right, #4b0082 0%, #4b0082 var(--value), #8a2be2 var(--value), #8a2be2 100%);
+            border: 1px solid #ffd700;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        body.light-theme .mission-card input[type="range"] {
+            background: linear-gradient(to right, #007bff 0%, #007bff var(--value), #0056b3 var(--value), #0056b3 100%);
+            border: 1px solid #007bff;
+        }
+        .mission-card input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #ffd700;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .mission-card input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #ffd700;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+        }
+        body.light-theme .mission-card input[type="range"]::-webkit-slider-thumb {
+            background: #ff8c00;
+        }
+        body.light-theme .mission-card input[type="range"]::-moz-range-thumb {
+            background: #ff8c00;
+        }
+        .mission-card input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        .mission-card input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+        .mission-card .task-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .xp-bar {
+            width: 100%;
+            max-width: 600px;
+            margin: 15px auto;
+            text-align: center;
+            background: linear-gradient(135deg, #4b0082, #8a2be2);
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+        }
+        body.light-theme .xp-bar {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+        }
+        .xp-bar progress {
+            width: 100%;
+            height: 18px;
+            accent-color: #ff00ff;
+            background: transparent;
+            border-radius: 8px;
+        }
+        body.light-theme .xp-bar progress {
+            accent-color: #007bff;
+        }
+        .xp-bar span {
+            display: block;
+            margin-top: 4px;
+            font-weight: bold;
+            font-size: clamp(11px, 2.5vw, 13px);
+        }
+        .toast {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+            max-width: 90%;
+            text-align: center;
+            font-size: clamp(10px, 2.5vw, 12px);
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        .category-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            width: 100%;
+        }
+        .category-card {
+            background: #002a5c;
+            padding: 8px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: clamp(120px, 30vw, 150px);
+        }
+        body.light-theme .category-card {
+            background: #e6f0fa;
+        }
+        .category-card input {
+            flex-grow: 1;
+            max-width: 250px;
+            width: 100%;
+            margin: 0 auto;
+            font-size: clamp(10px, 2.2vw, 12px);
+        }
+        .start-mission-btn {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: clamp(10px, 2.5vw, 12px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+            flex: 0 1 auto;
+            min-width: clamp(60px, 20vw, 80px);
+            text-align: center;
+            white-space: nowrap;
+        }
+        body.light-theme .start-mission-btn {
+            background: linear-gradient(135deg, #1e7e34, #155724);
+        }
+        .start-mission-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        .category-select {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 15px 0;
+            width: 100%;
+            padding-bottom: 5px;
+        }
+        .main-menu h2, .main-menu p {
+            display: block;
+            margin: 8px 0;
+            text-align: center;
+            font-size: clamp(1.2rem, 3.5vw, 1.6rem);
+        }
+        .main-menu p {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+        }
+        .charts-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            grid-column: span 2;
+            width: 100%;
+            justify-content: center;
+        }
+        .charts-container canvas {
+            background-color: #ffffff;
+            max-width: 100%;
+            max-height: 180px;
+            aspect-ratio: 2 / 1;
+        }
+        @media (max-width: 768px) {
+            .charts-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .charts-container div {
+                width: 100%;
+                max-width: 400px;
+            }
+        }
+        .category-progress-card, .attribute-progress-card {
+            background: linear-gradient(135deg, #002a5c, #001f3f);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            transition: transform 0.2s;
+            flex: 1;
+            min-width: clamp(140px, 30vw, 160px);
+        }
+        body.light-theme .category-progress-card, body.light-theme .attribute-progress-card {
+            background: linear-gradient(135deg, #e6f0fa, #d9e7f7);
+        }
+        .category-progress-card:hover, .attribute-progress-card:hover {
+            transform: scale(1.05);
+        }
+        .tasks-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            grid-column: span 2;
+            width: 100%;
+            justify-content: center;
+        }
+        .save-slots {
+            display: none;
+            flex-wrap: wrap;
+            gap: 12px;
+            grid-column: span 2;
+            width: 100%;
+        }
+        .save-slots.visible {
+            display: flex;
+        }
+        .slot-card {
+            background: linear-gradient(135deg, #002a5c, #001f3f);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            transition: transform 0.2s;
+            flex: 1 1 clamp(120px, 30vw, 140px);
+            text-align: center;
+            min-height: 140px;
+        }
+        body.light-theme .slot-card {
+            background: linear-gradient(135deg, #e6f0fa, #d9e7f7);
+        }
+        @media (max-width: 600px) {
+            .slot-card {
+                flex: 1 1 100%;
+                max-width: 100%;
+            }
+        }
+        .slot-card:hover {
+            transform: scale(1.05);
+        }
+        .slot-card button {
+            margin-top: 8px;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-size: clamp(10px, 2.2vw, 12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .slot-card button.load-btn {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+        body.light-theme .slot-card button.load-btn {
+            background: linear-gradient(135deg, #0056b3, #003d80);
+        }
+        .slot-card button.delete-btn {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+        body.light-theme .slot-card button.delete-btn {
+            background: linear-gradient(135deg, #c82333, #a71d2a);
+        }
+        .slot-card button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        .slot-card .save-btn {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
+        }
+        body.light-theme .slot-card .save-btn {
+            background: linear-gradient(135deg, #1e7e34, #155724);
+        }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            grid-column: span 2;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .action-buttons button {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: clamp(10px, 2.5vw, 12px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        body.light-theme .action-buttons button {
+            background: linear-gradient(135deg, #1e7e34, #155724);
+        }
+        .action-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            grid-column: span 2;
+            font-size: clamp(10px, 2.2vw, 12px);
+        }
+        .history-table th, .history-table td {
+            border: 1px solid #ffd700;
+            padding: 8px;
+            text-align: left;
+            word-wrap: break-word;
+        }
+        body.light-theme .history-table th, body.light-theme .history-table td {
+            border: 1px solid #007bff;
+        }
+        .history-table th {
+            background: #002a5c;
+        }
+        body.light-theme .history-table th {
+            background: #e6f0fa;
+        }
+        .history-table tr:nth-child(even) {
+            background: #001f3f;
+        }
+        body.light-theme .history-table tr:nth-child(even) {
+            background: #e6f0fa;
+        }
+        .settings-actions {
+            display: flex;
+            gap: 8px;
+            grid-column: span 2;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="landing-page" id="landing-page">
+        <div class="landing-content">
+            <h1>Bem-vindo ao RPG de Produtividade!</h1>
+            <p>Transforme suas tarefas em aventuras épicas!</p>
+            <button class="start-tasks-btn" onclick="showMenu()">Iniciar Tarefas</button>
+        </div>
+    </div>
+
+    <header style="display: none;" id="header">
+        <i class="fas fa-dice header-icon" onclick="showMenu()" title="RPG de Produtividade"></i>
+        <div class="icons">
+            <button class="icon-btn" onclick="showMenu()" aria-label="Abrir Menu Principal"><i class="fas fa-home"></i> Menu</button>
+            <button class="theme-btn" onclick="toggleTheme()" aria-label="Alternar Tema"><i class="fas fa-sun"></i></button>
+            <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Abrir Menu Lateral"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+
+    <div class="sidebar" id="sidebar">
+        <button class="close-sidebar" onclick="toggleSidebar()"><i class="fas fa-times"></i> Fechar</button>
+        <button class="icon-btn" onclick="showTasks(); toggleSidebar()" aria-label="Cadastrar Tasks"><i class="fas fa-plus"></i> Cadastrar</button>
+        <button class="icon-btn" onclick="showScore(); toggleSidebar()" aria-label="Ver Progresso"><i class="fas fa-trophy"></i> Progresso</button>
+        <button class="icon-btn" onclick="showHistory(); toggleSidebar()" aria-label="Ver Histórico"><i class="fas fa-history"></i> Histórico</button>
+        <button class="icon-btn" onclick="showSettings(); toggleSidebar()" aria-label="Configurações"><i class="fas fa-cog"></i> Configurações</button>
+    </div>
+
+    <div class="xp-bar" style="display: none;" id="xp-bar">
+        <progress id="global-xp" value="0" max="100"></progress>
+        <span id="xp-label">XP: 0 / 100 (Nível 1)</span>
+    </div>
+
+    <div class="container main-menu" id="main-menu" style="display: none;">
+        <h2>Bem-vindo ao RPG de Produtividade!</h2>
+        <p>Complete tasks, ganhe XP e suba de nível!</p>
+        <div class="category-select" id="category-select"></div>
+        <div class="missions-grid" id="missions-grid"></div>
+    </div>
+
+    <div class="container tasks-section" id="tasks-container" style="display: none;">
+        <h2>Cadastrar e Gerenciar Tasks</h2>
+        <div class="form-container">
+            <div class="form-group">
+                <label for="task-name">Nova Task:</label>
+                <input type="text" id="task-name" placeholder="Nome da task">
+                <label for="task-category">Categoria:</label>
+                <select id="task-category"></select>
+                <label for="task-type">Tipo:</label>
+                <select id="task-type">
+                    <option value="Diário">Diário</option>
+                    <option value="Semanal">Semanal</option>
+                    <option value="Única">Única</option>
+                </select>
+                <label for="task-difficulty">Dificuldade:</label>
+                <select id="task-difficulty">
+                    <option value="1">Fácil</option>
+                    <option value="1.5">Médio</option>
+                    <option value="2">Difícil</option>
+                </select>
+                <label>Atributos:</label>
+                <div class="attribute-buttons" id="attribute-buttons">
+                    <button type="button" class="attribute-btn" data-attribute="Força"><i class="fas fa-dumbbell"></i> Força</button>
+                    <button type="button" class="attribute-btn" data-attribute="Inteligência"><i class="fas fa-brain"></i> Inteligência</button>
+                    <button type="button" class="attribute-btn" data-attribute="Vitalidade"><i class="fas fa-heart"></i> Vitalidade</button>
+                    <button type="button" class="attribute-btn" data-attribute="Sabedoria"><i class="fas fa-book"></i> Sabedoria</button>
+                    <button type="button" class="attribute-btn" data-attribute="Destreza"><i class="fas fa-running"></i> Destreza</button>
+                </div>
+                <button onclick="addTask()">Adicionar Task</button>
+            </div>
+        </div>
+        <h3>Tasks Cadastradas</h3>
+        <div class="tasks-grid" id="tasks-grid"></div>
+        <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
+    </div>
+
+    <div class="container score-section" id="score-container" style="display: none;">
+        <h2>Seu Progresso</h2>
+        <p>XP: <span id="xp">0</span> | Nível: <span id="level">1</span> | Sequência: <span id="streak">0</span> dias</p>
+        <div class="progress-bar">
+            <label>Objetivo Diário (<span id="daily-goal-label">5</span> tasks):</label>
+            <progress id="daily-progress" value="0" max="5"></progress>
+        </div>
+        <div class="progress-bar">
+            <label>Objetivo Semanal (<span id="weekly-goal-label">200</span> XP):</label>
+            <progress id="weekly-progress" value="0" max="200"></progress>
+        </div>
+        <h3>Progresso por Categoria</h3>
+        <div class="missions-grid" id="category-progress"></div>
+        <h3>Progresso por Atributo</h3>
+        <div class="missions-grid" id="attribute-progress"></div>
+        <h3>Salvar Progresso</h3>
+        <div class="action-buttons">
+            <button onclick="toggleSaveSlots()"><i class="fas fa-save"></i> Salvar</button>
+            <button onclick="toggleSaveSlots()"><i class="fas fa-play"></i> Continuar</button>
+        </div>
+        <div class="save-slots" id="save-slots"></div>
+        <div class="charts-container">
+            <div>
+                <h3>Gráfico de XP Semanal (Barra)</h3>
+                <canvas id="xp-chart-bar" width="400" height="200"></canvas>
+            </div>
+            <div>
+                <h3>Tasks Concluídas por Dia (Mensal)</h3>
+                <canvas id="tasks-chart-monthly" width="400" height="200"></canvas>
+            </div>
+            <div>
+                <h3>Desempenho por Categoria (Radar)</h3>
+                <canvas id="xp-chart-radar" width="400" height="200"></canvas>
+            </div>
+            <div>
+                <h3>Desempenho por Atributo (Radar)</h3>
+                <canvas id="attribute-chart-radar" width="400" height="200"></canvas>
+            </div>
+        </div>
+        <div style="grid-column: span 2; display: flex; align-items: center; justify-content: center;">
+            <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
+            <button class="reset-btn" onclick="resetAll()" title="Resetar Progresso"><i class="fas fa-redo"></i> Resetar Tudo</button>
+        </div>
+    </div>
+
+    <div class="container history-section" id="history-container" style="display: none;">
+        <h2>Histórico de Tasks Concluídas</h2>
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Categoria</th>
+                    <th>Tipo</th>
+                    <th>Dificuldade</th>
+                    <th>Progresso (%)</th>
+                    <th>Atributos</th>
+                    <th>Data de Conclusão</th>
+                </tr>
+            </thead>
+            <tbody id="history-table-body"></tbody>
+        </table>
+        <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
+    </div>
+
+    <div class="container settings-section" id="settings-container" style="display: none;">
+        <h2>Configurações</h2>
+        <div class="form-container">
+            <div class="form-group">
+                <label for="new-category">Adicionar Categoria:</label>
+                <input type="text" id="new-category" placeholder="Nova categoria">
+                <button type="button" onclick="addCategory()">Adicionar</button>
+            </div>
+            <div class="form-group">
+                <label>Categorias Atuais:</label>
+                <div class="category-cards" id="category-cards"></div>
+            </div>
+            <div class="form-group">
+                <label for="xp-daily">XP para Diárias:</label>
+                <input type="number" id="xp-daily" value="10">
+            </div>
+            <div class="form-group">
+                <label for="xp-weekly">XP para Semanais:</label>
+                <input type="number" id="xp-weekly" value="50">
+            </div>
+            <div class="form-group">
+                <label for="xp-one-time">XP para Únicas:</label>
+                <input type="number" id="xp-one-time" value="20">
+            </div>
+            <div class="form-group">
+                <label for="difficulty-easy">Multiplicador Fácil:</label>
+                <input type="number" id="difficulty-easy" step="0.1" value="1">
+            </div>
+            <div class="form-group">
+                <label for="difficulty-medium">Multiplicador Médio:</label>
+                <input type="number" id="difficulty-medium" step="0.1" value="1.5">
+            </div>
+            <div class="form-group">
+                <label for="difficulty-hard">Multiplicador Difícil:</label>
+                <input type="number" id="difficulty-hard" step="0.1" value="2">
+            </div>
+            <div class="form-group">
+                <label for="daily-goal">Objetivo Diário (tasks):</label>
+                <input type="number" id="daily-goal" value="5">
+            </div>
+            <div class="form-group">
+                <label for="weekly-goal">Objetivo Semanal (XP):</label>
+                <input type="number" id="weekly-goal" value="200">
+            </div>
+            <div class="form-group">
+                <button class="save-settings-btn" onclick="saveSettings()"><i class="fas fa-save"></i> Salvar Configurações</button>
+                <button class="reset-btn" type="button" onclick="resetAll()"><i class="fas fa-redo"></i> Resetar Tudo</button>
+            </div>
+        </div>
+        <div class="settings-actions">
+            <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
+            <button class="clear-cache-btn" onclick="clearCache()" title="Apagar Cache"><i class="fas fa-trash"></i> Apagar Cache</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        let categories = JSON.parse(localStorage.getItem('categories')) || ['Saúde', 'Trabalho', 'Aprendizado', 'Lazer'];
+        let xp = parseInt(localStorage.getItem('xp')) || 0;
+        let level = Math.floor(xp / 100) + 1;
+        let dailyCount = parseInt(localStorage.getItem('dailyCount')) || 0;
+        let streak = parseInt(localStorage.getItem('streak')) || 0;
+        let lastReset = localStorage.getItem('lastReset') || new Date().toDateString();
+        let lastWeeklyReset = localStorage.getItem('lastWeeklyReset') || new Date().toDateString();
+        let xpHistory = JSON.parse(localStorage.getItem('xpHistory')) || Array(7).fill(0);
+        let xpByCategory = JSON.parse(localStorage.getItem('xpByCategory')) || {};
+        let attributesPoints = JSON.parse(localStorage.getItem('attributesPoints')) || {
+            Força: 0,
+            Inteligência: 0,
+            Vitalidade: 0,
+            Sabedoria: 0,
+            Destreza: 0
+        };
+        let xpDaily = parseInt(localStorage.getItem('xpDaily')) || 10;
+        let xpWeekly = parseInt(localStorage.getItem('xpWeekly')) || 50;
+        let xpOneTime = parseInt(localStorage.getItem('xpOneTime')) || 20;
+        let difficultyMultipliers = JSON.parse(localStorage.getItem('difficultyMultipliers')) || { easy: 1, medium: 1.5, hard: 2 };
+        let dailyGoal = parseInt(localStorage.getItem('dailyGoal')) || 5;
+        let weeklyGoal = parseInt(localStorage.getItem('weeklyGoal')) || 200;
+        let completedTasks = JSON.parse(localStorage.getItem('completedTasks')) || [];
+        let savedProgress = JSON.parse(localStorage.getItem('savedProgress')) || Array(5).fill(null);
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function init() {
+            // Initialize xpByCategory for all categories
+            categories.forEach(cat => {
+                if (!xpByCategory[cat]) {
+                    xpByCategory[cat] = 0;
+                }
+            });
+            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
+            updateCategorySelect();
+            updateCategoryCards();
+            updateTasksGrid();
+            updateMissions('all');
+            updateScore();
+            checkReset();
+            document.getElementById('landing-page').style.display = 'flex';
+            document.getElementById('xp-daily').value = xpDaily;
+            document.getElementById('xp-weekly').value = xpWeekly;
+            document.getElementById('xp-one-time').value = xpOneTime;
+            document.getElementById('difficulty-easy').value = difficultyMultipliers.easy;
+            document.getElementById('difficulty-medium').value = difficultyMultipliers.medium;
+            document.getElementById('difficulty-hard').value = difficultyMultipliers.hard;
+            document.getElementById('daily-goal').value = dailyGoal;
+            document.getElementById('weekly-goal').value = weeklyGoal;
+            initAttributeButtons();
+            initScrollSnap();
+            // Ensure dark theme is default
+            document.body.classList.remove('light-theme');
+            document.querySelector('.theme-btn i').className = 'fas fa-sun';
+        }
+
+        function initAttributeButtons() {
+            const buttons = document.querySelectorAll('.attribute-btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    button.classList.toggle('selected');
+                });
+            });
+        }
+
+        function initScrollSnap() {
+            const missionsGrid = document.getElementById('missions-grid');
+            missionsGrid.addEventListener('wheel', (event) => {
+                event.preventDefault();
+                const delta = Math.sign(event.deltaY) * 10;
+                missionsGrid.scrollBy({ top: delta, behavior: 'smooth' });
+            });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        function showSection(id) {
+            const sections = ['landing-page', 'main-menu', 'tasks-container', 'score-container', 'settings-container', 'history-container'];
+            sections.forEach(sec => {
+                const elem = document.getElementById(sec);
+                if (elem) {
+                    elem.style.display = 'none';
+                    elem.classList.remove('visible');
+                }
+            });
+            const target = document.getElementById(id);
+            if (target) {
+                target.style.display = id === 'landing-page' ? 'flex' : 'block';
+                setTimeout(() => target.classList.add('visible'), 10);
+                if (id === 'main-menu') {
+                    document.getElementById('header').style.display = 'flex';
+                    document.getElementById('xp-bar').style.display = 'block';
+                }
+                if (id === 'history-container') {
+                    updateHistory();
+                }
+                if (id === 'score-container') {
+                    updateCharts();
+                    updateAttributeProgress();
+                }
+                if (id === 'tasks-container') {
+                    resetAttributeButtons();
+                }
+            }
+        }
+
+        function resetAttributeButtons() {
+            const buttons = document.querySelectorAll('.attribute-btn');
+            buttons.forEach(button => {
+                button.classList.remove('selected');
+            });
+        }
+
+        function showMenu() {
+            showSection('main-menu');
+        }
+        function showTasks() { showSection('tasks-container'); }
+        function showScore() { showSection('score-container'); }
+        function showSettings() { showSection('settings-container'); }
+        function showHistory() { showSection('history-container'); }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            const themeIcon = document.querySelector('.theme-btn i');
+            themeIcon.className = document.body.classList.contains('light-theme') ? 'fas fa-moon' : 'fas fa-sun';
+            updateCharts();
+        }
+
+        function addTask() {
+            const name = document.getElementById('task-name').value;
+            const category = document.getElementById('task-category').value;
+            const type = document.getElementById('task-type').value;
+            const difficulty = parseFloat(document.getElementById('task-difficulty').value);
+            const attributes = Array.from(document.querySelectorAll('.attribute-btn.selected')).map(btn => btn.dataset.attribute);
+            if (!name) {
+                alert('Por favor, insira o nome da task.');
+                return;
+            }
+            if (attributes.length === 0) {
+                alert('Por favor, selecione pelo menos um atributo.');
+                return;
+            }
+            const internalType = type === 'Diário' ? 'daily' : type === 'Semanal' ? 'weekly' : 'one-time';
+            tasks.push({ name, category, type: internalType, difficulty, attributes, completed: false, progress: 100 });
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            document.getElementById('task-name').value = '';
+            resetAttributeButtons();
+            updateTasksGrid();
+            updateMissions('all');
+        }
+
+        function editTask(index, newName) {
+            tasks[index].name = newName;
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            updateTasksGrid();
+            updateMissions('all');
+        }
+
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            updateTasksGrid();
+            updateMissions('all');
+        }
+
+        function cancelTask(index) {
+            if (!window.confirm('Deseja cancelar esta task?')) return;
+            const task = tasks[index];
+            if (task.type !== 'daily') {
+                alert('Apenas tasks diárias podem ser canceladas.');
+                return;
+            }
+            task.completed = true;
+            completedTasks.push({ ...task, completedDate: new Date().toLocaleDateString('pt-BR') });
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            updateMissions('all');
+            updateTasksGrid();
+            updateHistory();
+        }
+
+        function updateTasksGrid() {
+            const grid = document.getElementById('tasks-grid');
+            grid.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const displayType = task.type === 'daily' ? 'Diário' : task.type === 'weekly' ? 'Semanal' : 'Única';
+                const attributeIcons = {
+                    Força: 'fas fa-dumbbell',
+                    Inteligência: 'fas fa-brain',
+                    Vitalidade: 'fas fa-heart',
+                    Sabedoria: 'fas fa-book',
+                    Destreza: 'fas fa-running'
+                };
+                const attributesHtml = (task.attributes || []).map(attr => `<i class="${attributeIcons[attr]}" title="${attr}"></i>`).join('');
+                const card = document.createElement('div');
+                card.className = 'task-card';
+                card.innerHTML = `
+                    <span>${task.name} (${task.category} - ${displayType})</span>
+                    <div class="attributes">${attributesHtml}</div>
+                    <div class="icons">
+                        <i class="fas fa-edit" onclick="promptEditTask(${index})" title="Editar"></i>
+                        <i class="fas fa-trash" onclick="deleteTask(${index})" title="Excluir"></i>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function promptEditTask(index) {
+            const newName = prompt('Editar nome da task:', tasks[index].name);
+            if (newName) editTask(index, newName);
+        }
+
+        function addCategory() {
+            const newCategory = document.getElementById('new-category').value;
+            if (newCategory && !categories.includes(newCategory)) {
+                categories.push(newCategory);
+                xpByCategory[newCategory] = 0;
+                localStorage.setItem('categories', JSON.stringify(categories));
+                localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
+                document.getElementById('new-category').value = '';
+                updateCategoryCards();
+                updateCategorySelect();
+            } else {
+                alert('Categoria inválida ou já existe.');
+            }
+        }
+
+        function editCategory(oldCat, newCat) {
+            const index = categories.indexOf(oldCat);
+            if (index !== -1 && newCat && !categories.includes(newCat)) {
+                categories[index] = newCat;
+                xpByCategory[newCat] = xpByCategory[oldCat];
+                delete xpByCategory[oldCat];
+                tasks.forEach(task => {
+                    if (task.category === oldCat) task.category = newCat;
+                });
+                completedTasks.forEach(task => {
+                    if (task.category === oldCat) task.category = newCat;
+                });
+                localStorage.setItem('categories', JSON.stringify(categories));
+                localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+                updateCategoryCards();
+                updateCategorySelect();
+                updateHistory();
+            } else {
+                alert('Categoria inválida ou já existe.');
+            }
+        }
+
+        function deleteCategory(cat) {
+            categories = categories.filter(c => c !== cat);
+            delete xpByCategory[cat];
+            tasks = tasks.filter(task => task.category !== cat);
+            completedTasks = completedTasks.filter(task => task.category !== cat);
+            localStorage.setItem('categories', JSON.stringify(categories));
+            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            updateCategoryCards();
+            updateCategorySelect();
+            updateHistory();
+        }
+
+        function updateCategoryCards() {
+            const cards = document.getElementById('category-cards');
+            cards.innerHTML = '';
+            categories.forEach(cat => {
+                const card = document.createElement('div');
+                card.className = 'category-card';
+                card.innerHTML = `
+                    <input type="text" value="${cat}" onchange="editCategory('${cat}', this.value)">
+                    <i class="fas fa-trash" onclick="deleteCategory('${cat}')"></i>
+                `;
+                cards.appendChild(card);
+            });
+        }
+
+        function updateCategorySelect() {
+            const select = document.getElementById('task-category');
+            const catSelect = document.getElementById('category-select');
+            select.innerHTML = '';
+            catSelect.innerHTML = '';
+            const allBtn = document.createElement('button');
+            allBtn.className = 'start-mission-btn';
+            allBtn.textContent = 'Todas';
+            allBtn.onclick = () => updateMissions('all');
+            catSelect.appendChild(allBtn);
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                select.appendChild(option);
+
+                const btn = document.createElement('button');
+                btn.className = 'start-mission-btn';
+                btn.textContent = cat;
+                btn.onclick = () => updateMissions(cat);
+                catSelect.appendChild(btn);
+            });
+        }
+
+        function updateMissions(category) {
+            const grid = document.getElementById('missions-grid');
+            grid.innerHTML = '';
+            let filteredTasks = tasks.filter(task => !task.completed);
+            if (category !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.category === category);
+            }
+            const attributeIcons = {
+                Força: 'fas fa-dumbbell',
+                Inteligência: 'fas fa-brain',
+                Vitalidade: 'fas fa-heart',
+                Sabedoria: 'fas fa-book',
+                Destreza: 'fas fa-running'
+            };
+            filteredTasks.forEach(task => {
+                const index = tasks.findIndex(t => t === task);
+                const displayType = task.type === 'daily' ? 'Diário' : task.type === 'weekly' ? 'Semanal' : 'Única';
+                const attributesHtml = (task.attributes || []).map(attr => `<i class="${attributeIcons[attr]}" title="${attr}"></i>`).join('');
+                const card = document.createElement('div');
+                card.className = 'mission-card';
+                card.innerHTML = `
+                    <h3>${task.name}</h3>
+                    <p>${task.category} - ${displayType}</p>
+                    <div class="attributes">${attributesHtml}</div>
+                    <div class="task-progress">
+                        <input type="range" min="0" max="100" value="${task.progress}" step="10" oninput="this.style.setProperty('--value', this.value + '%'); updatePartialXP(${index}, this.value)" onchange="updatePartialXP(${index}, this.value)">
+                        <span>${task.progress}%</span>
+                    </div>
+                    <div class="task-actions">
+                        <button onclick="confirmToggleTask(${index})">Completar</button>
+                        ${task.type === 'daily' ? `<button class="cancel-btn" onclick="cancelTask(${index})">Cancelar</button>` : ''}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        const debouncedUpdatePartialXP = debounce((index, value) => {
+            tasks[index].progress = parseInt(value);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            updateMissions('all');
+        }, 100);
+
+        function updatePartialXP(index, value) {
+            debouncedUpdatePartialXP(index, value);
+        }
+
+        function confirmToggleTask(index) {
+            if (!window.confirm('Deseja completar esta task?')) return;
+            toggleTask(index);
+        }
+
+        function toggleTask(index) {
+            const task = tasks[index];
+            if (task.completed) return;
+            const displayType = task.type === 'daily' ? 'Diário' : task.type === 'weekly' ? 'Semanal' : 'Única';
+            completedTasks.push({ ...task, type: displayType, completedDate: new Date().toLocaleDateString('pt-BR') });
+            const basePoints = task.type === 'daily' ? xpDaily : task.type === 'weekly' ? xpWeekly : xpOneTime;
+            const multiplier = task.difficulty === 1 ? difficultyMultipliers.easy : task.difficulty === 1.5 ? difficultyMultipliers.medium : task.difficulty === 2 ? difficultyMultipliers.hard : 1;
+            let points = basePoints * multiplier * (1 + streak * 0.05);
+            points *= (task.progress / 100);
+            xp += points;
+            xpByCategory[task.category] = (xpByCategory[task.category] || 0) + points;
+            const pointsPerAttribute = task.attributes && task.attributes.length > 0 ? points / task.attributes.length : 0;
+            (task.attributes || []).forEach(attr => {
+                attributesPoints[attr] = (attributesPoints[attr] || 0) + pointsPerAttribute;
+            });
+            const dayIndex = new Date().getDay();
+            xpHistory[dayIndex] += points;
+            localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
+            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
+            localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            if (task.type === 'daily') {
+                dailyCount++;
+            }
+            if (task.type === 'one-time') {
+                tasks.splice(index, 1);
+            } else {
+                task.completed = true;
+            }
+            if (Math.floor(xp / 100) + 1 > level) {
+                level = Math.floor(xp / 100) + 1;
+                alert(`Parabéns! Você subiu para o nível ${level}!`);
+            }
+            localStorage.setItem('xp', xp);
+            localStorage.setItem('dailyCount', dailyCount);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            showToast(`+${points.toFixed(0)} XP!`);
+            updateMissions('all');
+            updateTasksGrid();
+            updateScore();
+            updateHistory();
+        }
+
+        function updateScore() {
+            document.getElementById('xp').textContent = xp;
+            document.getElementById('level').textContent = level;
+            document.getElementById('streak').textContent = streak;
+            document.getElementById('daily-progress').max = dailyGoal;
+            document.getElementById('daily-progress').value = dailyCount;
+            document.getElementById('weekly-progress').max = weeklyGoal;
+            document.getElementById('weekly-progress').value = xp % weeklyGoal;
+            document.getElementById('daily-goal-label').textContent = dailyGoal;
+            document.getElementById('weekly-goal-label').textContent = weeklyGoal;
+            const progress = xp % 100;
+            document.getElementById('global-xp').value = progress;
+            document.getElementById('xp-label').textContent = `XP: ${progress} / 100 (Nível ${level})`;
+            updateCategoryProgress();
+            updateAttributeProgress();
+            updateSaveSlots();
+            updateCharts();
+        }
+
+        function updateCategoryProgress() {
+            const grid = document.getElementById('category-progress');
+            grid.innerHTML = '';
+            categories.forEach(cat => {
+                const xp = xpByCategory[cat] || 0;
+                const level = Math.floor(xp / 100) + 1;
+                const progress = xp % 100;
+                const card = document.createElement('div');
+                card.className = 'category-progress-card';
+                card.innerHTML = `
+                    <h3>${cat}</h3>
+                    <p>XP: ${xp} | Nível: ${level}</p>
+                    <progress value="${progress}" max="100"></progress>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function updateAttributeProgress() {
+            const grid = document.getElementById('attribute-progress');
+            grid.innerHTML = '';
+            const attributes = ['Força', 'Inteligência', 'Vitalidade', 'Sabedoria', 'Destreza'];
+            attributes.forEach(attr => {
+                const points = attributesPoints[attr] || 0;
+                const card = document.createElement('div');
+                card.className = 'attribute-progress-card';
+                card.innerHTML = `
+                    <h3>${attr}</h3>
+                    <p>Pontos: ${points.toFixed(0)}</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function toggleSaveSlots() {
+            const slots = document.getElementById('save-slots');
+            slots.classList.toggle('visible');
+        }
+
+        function saveToSlot(index) {
+            if (savedProgress[index] && !window.confirm('Este slot já contém um progresso salvo. Deseja sobrescrever?')) {
+                return;
+            }
+            savedProgress[index] = {
+                xp,
+                level,
+                streak,
+                dailyCount,
+                xpHistory,
+                xpByCategory,
+                attributesPoints,
+                tasks,
+                completedTasks,
+                date: new Date().toLocaleString()
+            };
+            localStorage.setItem('savedProgress', JSON.stringify(savedProgress));
+            updateSaveSlots();
+            showToast('Progresso salvo no slot ' + (index + 1));
+        }
+
+        function loadProgress(index) {
+            if (!savedProgress[index]) {
+                alert('Slot vazio!');
+                return;
+            }
+            const slot = savedProgress[index];
+            xp = slot.xp;
+            level = slot.level;
+            streak = slot.streak;
+            dailyCount = slot.dailyCount;
+            xpHistory = slot.xpHistory;
+            xpByCategory = slot.xpByCategory;
+            attributesPoints = slot.attributesPoints;
+            tasks = slot.tasks;
+            completedTasks = slot.completedTasks;
+            localStorage.setItem('xp', xp);
+            localStorage.setItem('dailyCount', dailyCount);
+            localStorage.setItem('streak', streak);
+            localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
+            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
+            localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            updateTasksGrid();
+            updateMissions('all');
+            updateScore();
+            updateHistory();
+            showToast('Progresso carregado do slot ' + (index + 1));
+        }
+        function deleteProgress(index) {
+            if (!savedProgress[index]) {
+                alert('Slot vazio!');
+                return;
+            }
+            if (!window.confirm('Deseja excluir o progresso salvo neste slot?')) return;
+            savedProgress[index] = null;
+            localStorage.setItem('savedProgress', JSON.stringify(savedProgress));
+            updateSaveSlots();
+            showToast('Progresso excluído do slot ' + (index + 1));
+        }
+
+        function updateSaveSlots() {
+            const slots = document.getElementById('save-slots');
+            slots.innerHTML = '';
+            savedProgress.forEach((slot, index) => {
+                const card = document.createElement('div');
+                card.className = 'slot-card';
+                card.innerHTML = `
+                    <h3>Slot ${index + 1}</h3>
+                    <p>${slot ? `Salvo em: ${slot.date}` : 'Vazio'}</p>
+                    ${slot ? `<p>XP: ${slot.xp} | Nível: ${slot.level}</p>` : ''}
+                    <div>
+                        <button class="save-btn" onclick="saveToSlot(${index})"><i class="fas fa-save"></i> Salvar</button>
+                        ${slot ? `
+                            <button class="load-btn" onclick="loadProgress(${index})"><i class="fas fa-play"></i> Carregar</button>
+                            <button class="delete-btn" onclick="deleteProgress(${index})"><i class="fas fa-trash"></i> Excluir</button>
+                        ` : ''}
+                    </div>
+                `;
+                slots.appendChild(card);
+            });
+        }
+
+        function saveSettings() {
+            xpDaily = parseInt(document.getElementById('xp-daily').value) || 10;
+            xpWeekly = parseInt(document.getElementById('xp-weekly').value) || 50;
+            xpOneTime = parseInt(document.getElementById('xp-one-time').value) || 20;
+            difficultyMultipliers.easy = parseFloat(document.getElementById('difficulty-easy').value) || 1;
+            difficultyMultipliers.medium = parseFloat(document.getElementById('difficulty-medium').value) || 1.5;
+            difficultyMultipliers.hard = parseFloat(document.getElementById('difficulty-hard').value) || 2;
+            dailyGoal = parseInt(document.getElementById('daily-goal').value) || 5;
+            weeklyGoal = parseInt(document.getElementById('weekly-goal').value) || 200;
+            localStorage.setItem('xpDaily', xpDaily);
+            localStorage.setItem('xpWeekly', xpWeekly);
+            localStorage.setItem('xpOneTime', xpOneTime);
+            localStorage.setItem('difficultyMultipliers', JSON.stringify(difficultyMultipliers));
+            localStorage.setItem('dailyGoal', dailyGoal);
+            localStorage.setItem('weeklyGoal', weeklyGoal);
+            updateScore();
+            showToast('Configurações salvas!');
+        }
+
+        function resetAll() {
+            if (!window.confirm('Deseja resetar todo o progresso? Esta ação não pode ser desfeita.')) return;
+            xp = 0;
+            level = 1;
+            streak = 0;
+            dailyCount = 0;
+            tasks = [];
+            completedTasks = [];
+            xpHistory = Array(7).fill(0);
+            xpByCategory = {};
+            attributesPoints = { Força: 0, Inteligência: 0, Vitalidade: 0, Sabedoria: 0, Destreza: 0 };
+            savedProgress = Array(5).fill(null);
+            categories.forEach(cat => xpByCategory[cat] = 0);
+            localStorage.setItem('xp', xp);
+            localStorage.setItem('level', level);
+            localStorage.setItem('streak', streak);
+            localStorage.setItem('dailyCount', dailyCount);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
+            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
+            localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
+            localStorage.setItem('savedProgress', JSON.stringify(savedProgress));
+            updateTasksGrid();
+            updateMissions('all');
+            updateScore();
+            updateHistory();
+            showToast('Progresso resetado!');
+        }
+
+        function clearCache() {
+            if (!window.confirm('Deseja apagar o cache? Isso resetará todas as configurações e progresso.')) return;
+            localStorage.clear();
+            tasks = [];
+            categories = ['Saúde', 'Trabalho', 'Aprendizado', 'Lazer'];
+            xp = 0;
+            level = 1;
+            streak = 0;
+            dailyCount = 0;
+            xpHistory = Array(7).fill(0);
+            xpByCategory = {};
+            attributesPoints = { Força: 0, Inteligência: 0, Vitalidade: 0, Sabedoria: 0, Destreza: 0 };
+            savedProgress = Array(5).fill(null);
+            xpDaily = 10;
+            xpWeekly = 50;
+            xpOneTime = 20;
+            difficultyMultipliers = { easy: 1, medium: 1.5, hard: 2 };
+            dailyGoal = 5;
+            weeklyGoal = 200;
+            localStorage.setItem('categories', JSON.stringify(categories));
+            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
+            updateCategorySelect();
+            updateCategoryCards();
+            updateTasksGrid();
+            updateMissions('all');
+            updateScore();
+            updateHistory();
+            showToast('Cache apagado!');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function checkReset() {
+            const today = new Date().toDateString();
+            const lastWeek = new Date(lastWeeklyReset);
+            const now = new Date();
+            const diffDays = Math.floor((now - lastWeek) / (1000 * 60 * 60 * 24));
+            if (today !== lastReset) {
+                tasks.forEach(task => {
+                    if (task.type === 'daily') task.completed = false;
+                });
+                if (dailyCount >= dailyGoal) {
+                    streak++;
+                } else {
+                    streak = 0;
+                }
+                dailyCount = 0;
+                lastReset = today;
+                localStorage.setItem('lastReset', lastReset);
+                localStorage.setItem('streak', streak);
+                localStorage.setItem('dailyCount', dailyCount);
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }
+            if (diffDays >= 7) {
+                tasks.forEach(task => {
+                    if (task.type === 'weekly') task.completed = false;
+                });
+                xpHistory = Array(7).fill(0);
+                lastWeeklyReset = today;
+                localStorage.setItem('lastWeeklyReset', lastWeeklyReset);
+                localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }
+            updateMissions('all');
+            updateScore();
+        }
+
+        function updateHistory() {
+            const tbody = document.getElementById('history-table-body');
+            tbody.innerHTML = '';
+            completedTasks.forEach(task => {
+                const attributeIcons = {
+                    Força: 'fas fa-dumbbell',
+                    Inteligência: 'fas fa-brain',
+                    Vitalidade: 'fas fa-heart',
+                    Sabedoria: 'fas fa-book',
+                    Destreza: 'fas fa-running'
+                };
+                const attributesHtml = (task.attributes || []).map(attr => `<i class="${attributeIcons[attr]}" title="${attr}"></i>`).join('');
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${task.name}</td>
+                    <td>${task.category}</td>
+                    <td>${task.type}</td>
+                    <td>${task.difficulty === 1 ? 'Fácil' : task.difficulty === 1.5 ? 'Médio' : 'Difícil'}</td>
+                    <td>${task.progress}%</td>
+                    <td>${attributesHtml}</td>
+                    <td>${task.completedDate}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateCharts() {
+            const isLightTheme = document.body.classList.contains('light-theme');
+            const backgroundColors = isLightTheme
+                ? ['#007bff', '#0056b3', '#003d80', '#e6f0fa', '#d9e7f7', '#a0c4ff']
+                : ['#ffd700', '#ff8c00', '#4b0082', '#8a2be2', '#002a5c', '#001f3f'];
+            const borderColors = isLightTheme ? '#003d80' : '#ffd700';
+
+            // XP Weekly Bar Chart
+            const xpChartBar = new Chart(document.getElementById('xp-chart-bar'), {
+                type: 'bar',
+                data: {
+                    labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+                    datasets: [{
+                        label: 'XP Ganho',
+                        data: xpHistory,
+                        backgroundColor: backgroundColors[0],
+                        borderColor: borderColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // Tasks Completed Monthly Line Chart
+            const tasksPerDay = Array(30).fill(0);
+            completedTasks.forEach(task => {
+                const date = new Date(task.completedDate.split('/').reverse().join('-'));
+                const dayIndex = Math.floor((new Date() - date) / (1000 * 60 * 60 * 24));
+                if (dayIndex >= 0 && dayIndex < 30) {
+                    tasksPerDay[29 - dayIndex]++;
+                }
+            });
+            const tasksChartMonthly = new Chart(document.getElementById('tasks-chart-monthly'), {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: 30 }, (_, i) => `Dia ${30 - i}`),
+                    datasets: [{
+                        label: 'Tasks Concluídas',
+                        data: tasksPerDay,
+                        backgroundColor: backgroundColors[1],
+                        borderColor: borderColors,
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+
+            // XP by Category Radar Chart
+            const xpChartRadar = new Chart(document.getElementById('xp-chart-radar'), {
+                type: 'radar',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        label: 'XP por Categoria',
+                        data: categories.map(cat => xpByCategory[cat] || 0),
+                        backgroundColor: backgroundColors[2] + '80', // Add transparency
+                        borderColor: borderColors,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // Attributes Radar Chart
+            const attributeChartRadar = new Chart(document.getElementById('attribute-chart-radar'), {
+                type: 'radar',
+                data: {
+                    labels: ['Força', 'Inteligência', 'Vitalidade', 'Sabedoria', 'Destreza'],
+                    datasets: [{
+                        label: 'Pontos por Atributo',
+                        data: Object.values(attributesPoints),
+                        backgroundColor: backgroundColors[3] + '80', // Add transparency
+                        borderColor: borderColors,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // Initialize on page load
+        window.onload = init;
+    </script>
+</body>
+</html>
