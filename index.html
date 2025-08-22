@@ -1021,6 +1021,7 @@
                     <button type="button" class="attribute-btn" data-attribute="Vitalidade"><i class="fas fa-heart"></i> Vitalidade</button>
                     <button type="button" class="attribute-btn" data-attribute="Sabedoria"><i class="fas fa-book"></i> Sabedoria</button>
                     <button type="button" class="attribute-btn" data-attribute="Destreza"><i class="fas fa-running"></i> Destreza</button>
+                    <button type="button" class="attribute-btn" data-attribute="Humor"><i class="fas fa-smile"></i> Humor</button>
                 </div>
                 <button onclick="addTask()">Adicionar Task</button>
             </div>
@@ -1167,7 +1168,8 @@
             Inteligência: 0,
             Vitalidade: 0,
             Sabedoria: 0,
-            Destreza: 0
+            Destreza: 0,
+            Humor: 0
         };
         let xpDaily = parseInt(localStorage.getItem('xpDaily')) || 10;
         let xpWeekly = parseInt(localStorage.getItem('xpWeekly')) || 50;
@@ -1316,6 +1318,7 @@
             resetAttributeButtons();
             updateTasksGrid();
             updateMissions('all');
+            showToast('Task adicionada com sucesso!');
         }
 
         function editTask(index, newName) {
@@ -1358,7 +1361,8 @@
                     Inteligência: 'fas fa-brain',
                     Vitalidade: 'fas fa-heart',
                     Sabedoria: 'fas fa-book',
-                    Destreza: 'fas fa-running'
+                    Destreza: 'fas fa-running',
+                    Humor: 'fas fa-smile'
                 };
                 const attributesHtml = (task.attributes || []).map(attr => `<i class="${attributeIcons[attr]}" title="${attr}"></i>`).join('');
                 const card = document.createElement('div');
@@ -1483,7 +1487,8 @@
                 Inteligência: 'fas fa-brain',
                 Vitalidade: 'fas fa-heart',
                 Sabedoria: 'fas fa-book',
-                Destreza: 'fas fa-running'
+                Destreza: 'fas fa-running',
+                Humor: 'fas fa-smile'
             };
             filteredTasks.forEach(task => {
                 const index = tasks.findIndex(t => t === task);
@@ -1606,7 +1611,7 @@
         function updateAttributeProgress() {
             const grid = document.getElementById('attribute-progress');
             grid.innerHTML = '';
-            const attributes = ['Força', 'Inteligência', 'Vitalidade', 'Sabedoria', 'Destreza'];
+            const attributes = ['Força', 'Inteligência', 'Vitalidade', 'Sabedoria', 'Destreza', 'Humor'];
             attributes.forEach(attr => {
                 const points = attributesPoints[attr] || 0;
                 const card = document.createElement('div');
@@ -1674,16 +1679,13 @@
             updateHistory();
             showToast('Progresso carregado do slot ' + (index + 1));
         }
+
         function deleteProgress(index) {
-            if (!savedProgress[index]) {
-                alert('Slot vazio!');
-                return;
-            }
-            if (!window.confirm('Deseja excluir o progresso salvo neste slot?')) return;
+            if (!window.confirm('Deseja apagar o progresso salvo neste slot?')) return;
             savedProgress[index] = null;
             localStorage.setItem('savedProgress', JSON.stringify(savedProgress));
             updateSaveSlots();
-            showToast('Progresso excluído do slot ' + (index + 1));
+            showToast('Progresso apagado do slot ' + (index + 1));
         }
 
         function updateSaveSlots() {
@@ -1695,17 +1697,119 @@
                 card.innerHTML = `
                     <h3>Slot ${index + 1}</h3>
                     <p>${slot ? `Salvo em: ${slot.date}` : 'Vazio'}</p>
-                    ${slot ? `<p>XP: ${slot.xp} | Nível: ${slot.level}</p>` : ''}
-                    <div>
-                        <button class="save-btn" onclick="saveToSlot(${index})"><i class="fas fa-save"></i> Salvar</button>
-                        ${slot ? `
-                            <button class="load-btn" onclick="loadProgress(${index})"><i class="fas fa-play"></i> Carregar</button>
-                            <button class="delete-btn" onclick="deleteProgress(${index})"><i class="fas fa-trash"></i> Excluir</button>
-                        ` : ''}
-                    </div>
+                    ${slot ? `<button class="load-btn" onclick="loadProgress(${index})"><i class="fas fa-play"></i> Carregar</button>` : ''}
+                    ${slot ? `<button class="delete-btn" onclick="deleteProgress(${index})"><i class="fas fa-trash"></i> Apagar</button>` : ''}
+                    <button class="save-btn" onclick="saveToSlot(${index})"><i class="fas fa-save"></i> Salvar</button>
                 `;
                 slots.appendChild(card);
             });
+        }
+
+        function updateHistory() {
+            const tableBody = document.getElementById('history-table-body');
+            tableBody.innerHTML = '';
+            const attributeIcons = {
+                Força: 'fas fa-dumbbell',
+                Inteligência: 'fas fa-brain',
+                Vitalidade: 'fas fa-heart',
+                Sabedoria: 'fas fa-book',
+                Destreza: 'fas fa-running',
+                Humor: 'fas fa-smile'
+            };
+            completedTasks.forEach(task => {
+                const attributesHtml = (task.attributes || []).map(attr => `<i class="${attributeIcons[attr]}" title="${attr}"></i>`).join('');
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${task.name}</td>
+                    <td>${task.category}</td>
+                    <td>${task.type}</td>
+                    <td>${task.difficulty === 1 ? 'Fácil' : task.difficulty === 1.5 ? 'Médio' : 'Difícil'}</td>
+                    <td>${task.progress}%</td>
+                    <td>${attributesHtml}</td>
+                    <td>${task.completedDate}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function resetAll() {
+            if (!window.confirm('Tem certeza que deseja resetar todo o progresso? Esta ação não pode ser desfeita.')) return;
+            xp = 0;
+            level = 1;
+            dailyCount = 0;
+            streak = 0;
+            tasks = [];
+            completedTasks = [];
+            xpHistory = Array(7).fill(0);
+            xpByCategory = {};
+            attributesPoints = {
+                Força: 0,
+                Inteligência: 0,
+                Vitalidade: 0,
+                Sabedoria: 0,
+                Destreza: 0,
+                Humor: 0
+            };
+            categories.forEach(cat => xpByCategory[cat] = 0);
+            localStorage.setItem('xp', xp);
+            localStorage.setItem('dailyCount', dailyCount);
+            localStorage.setItem('streak', streak);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
+            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
+            localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
+            updateTasksGrid();
+            updateMissions('all');
+            updateScore();
+            updateHistory();
+            showToast('Progresso resetado!');
+        }
+
+        function clearCache() {
+            if (!window.confirm('Tem certeza que deseja apagar o cache? Isso limpará todas as configurações e progresso.')) return;
+            localStorage.clear();
+            tasks = [];
+            categories = ['Saúde', 'Trabalho', 'Aprendizado', 'Lazer'];
+            xp = 0;
+            level = 1;
+            dailyCount = 0;
+            streak = 0;
+            xpHistory = Array(7).fill(0);
+            xpByCategory = {};
+            attributesPoints = {
+                Força: 0,
+                Inteligência: 0,
+                Vitalidade: 0,
+                Sabedoria: 0,
+                Destreza: 0,
+                Humor: 0
+            };
+            savedProgress = Array(5).fill(null);
+            xpDaily = 10;
+            xpWeekly = 50;
+            xpOneTime = 20;
+            difficultyMultipliers = { easy: 1, medium: 1.5, hard: 2 };
+            dailyGoal = 5;
+            weeklyGoal = 200;
+            categories.forEach(cat => xpByCategory[cat] = 0);
+            localStorage.setItem('categories', JSON.stringify(categories));
+            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
+            localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
+            localStorage.setItem('savedProgress', JSON.stringify(savedProgress));
+            localStorage.setItem('xpDaily', xpDaily);
+            localStorage.setItem('xpWeekly', xpWeekly);
+            localStorage.setItem('xpOneTime', xpOneTime);
+            localStorage.setItem('difficultyMultipliers', JSON.stringify(difficultyMultipliers));
+            localStorage.setItem('dailyGoal', dailyGoal);
+            localStorage.setItem('weeklyGoal', weeklyGoal);
+            updateCategoryCards();
+            updateCategorySelect();
+            updateTasksGrid();
+            updateMissions('all');
+            updateScore();
+            updateHistory();
+            showToast('Cache limpo com sucesso!');
         }
 
         function saveSettings() {
@@ -1727,193 +1831,134 @@
             showToast('Configurações salvas!');
         }
 
-        function resetAll() {
-            if (!window.confirm('Deseja resetar todo o progresso? Esta ação não pode ser desfeita.')) return;
-            xp = 0;
-            level = 1;
-            streak = 0;
-            dailyCount = 0;
-            tasks = [];
-            completedTasks = [];
-            xpHistory = Array(7).fill(0);
-            xpByCategory = {};
-            attributesPoints = { Força: 0, Inteligência: 0, Vitalidade: 0, Sabedoria: 0, Destreza: 0 };
-            savedProgress = Array(5).fill(null);
-            categories.forEach(cat => xpByCategory[cat] = 0);
-            localStorage.setItem('xp', xp);
-            localStorage.setItem('level', level);
-            localStorage.setItem('streak', streak);
-            localStorage.setItem('dailyCount', dailyCount);
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
-            localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
-            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
-            localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
-            localStorage.setItem('savedProgress', JSON.stringify(savedProgress));
-            updateTasksGrid();
-            updateMissions('all');
-            updateScore();
-            updateHistory();
-            showToast('Progresso resetado!');
+        function checkReset() {
+            const today = new Date().toDateString();
+            if (lastReset !== today) {
+                tasks.forEach(task => {
+                    if (task.type === 'daily') task.completed = false;
+                });
+                const completedToday = completedTasks.filter(task => task.completedDate === new Date().toLocaleDateString('pt-BR')).length;
+                streak = completedToday >= dailyGoal ? streak + 1 : 0;
+                dailyCount = 0;
+                lastReset = today;
+                localStorage.setItem('lastReset', lastReset);
+                localStorage.setItem('dailyCount', dailyCount);
+                localStorage.setItem('streak', streak);
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                updateTasksGrid();
+                updateMissions('all');
+                updateScore();
+            }
+            const currentWeek = getWeekNumber(new Date());
+            const lastWeek = lastWeeklyReset ? getWeekNumber(new Date(lastWeeklyReset)) : currentWeek;
+            if (currentWeek !== lastWeek) {
+                tasks.forEach(task => {
+                    if (task.type === 'weekly') task.completed = false;
+                });
+                lastWeeklyReset = today;
+                localStorage.setItem('lastWeeklyReset', lastWeeklyReset);
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                updateTasksGrid();
+                updateMissions('all');
+                updateScore();
+            }
         }
 
-        function clearCache() {
-            if (!window.confirm('Deseja apagar o cache? Isso resetará todas as configurações e progresso.')) return;
-            localStorage.clear();
-            tasks = [];
-            categories = ['Saúde', 'Trabalho', 'Aprendizado', 'Lazer'];
-            xp = 0;
-            level = 1;
-            streak = 0;
-            dailyCount = 0;
-            xpHistory = Array(7).fill(0);
-            xpByCategory = {};
-            attributesPoints = { Força: 0, Inteligência: 0, Vitalidade: 0, Sabedoria: 0, Destreza: 0 };
-            savedProgress = Array(5).fill(null);
-            xpDaily = 10;
-            xpWeekly = 50;
-            xpOneTime = 20;
-            difficultyMultipliers = { easy: 1, medium: 1.5, hard: 2 };
-            dailyGoal = 5;
-            weeklyGoal = 200;
-            localStorage.setItem('categories', JSON.stringify(categories));
-            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
-            updateCategorySelect();
-            updateCategoryCards();
-            updateTasksGrid();
-            updateMissions('all');
-            updateScore();
-            updateHistory();
-            showToast('Cache apagado!');
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDate() % 7));
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
         }
 
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
-        function checkReset() {
-            const today = new Date().toDateString();
-            const lastWeek = new Date(lastWeeklyReset);
-            const now = new Date();
-            const diffDays = Math.floor((now - lastWeek) / (1000 * 60 * 60 * 24));
-            if (today !== lastReset) {
-                tasks.forEach(task => {
-                    if (task.type === 'daily') task.completed = false;
-                });
-                if (dailyCount >= dailyGoal) {
-                    streak++;
-                } else {
-                    streak = 0;
-                }
-                dailyCount = 0;
-                lastReset = today;
-                localStorage.setItem('lastReset', lastReset);
-                localStorage.setItem('streak', streak);
-                localStorage.setItem('dailyCount', dailyCount);
-                localStorage.setItem('tasks', JSON.stringify(tasks));
-            }
-            if (diffDays >= 7) {
-                tasks.forEach(task => {
-                    if (task.type === 'weekly') task.completed = false;
-                });
-                xpHistory = Array(7).fill(0);
-                lastWeeklyReset = today;
-                localStorage.setItem('lastWeeklyReset', lastWeeklyReset);
-                localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
-                localStorage.setItem('tasks', JSON.stringify(tasks));
-            }
-            updateMissions('all');
-            updateScore();
-        }
-
-        function updateHistory() {
-            const tbody = document.getElementById('history-table-body');
-            tbody.innerHTML = '';
-            completedTasks.forEach(task => {
-                const attributeIcons = {
-                    Força: 'fas fa-dumbbell',
-                    Inteligência: 'fas fa-brain',
-                    Vitalidade: 'fas fa-heart',
-                    Sabedoria: 'fas fa-book',
-                    Destreza: 'fas fa-running'
-                };
-                const attributesHtml = (task.attributes || []).map(attr => `<i class="${attributeIcons[attr]}" title="${attr}"></i>`).join('');
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${task.name}</td>
-                    <td>${task.category}</td>
-                    <td>${task.type}</td>
-                    <td>${task.difficulty === 1 ? 'Fácil' : task.difficulty === 1.5 ? 'Médio' : 'Difícil'}</td>
-                    <td>${task.progress}%</td>
-                    <td>${attributesHtml}</td>
-                    <td>${task.completedDate}</td>
-                `;
-                tbody.appendChild(row);
-            });
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
 
         function updateCharts() {
-            const isLightTheme = document.body.classList.contains('light-theme');
-            const backgroundColors = isLightTheme
-                ? ['#007bff', '#0056b3', '#003d80', '#e6f0fa', '#d9e7f7', '#a0c4ff']
-                : ['#ffd700', '#ff8c00', '#4b0082', '#8a2be2', '#002a5c', '#001f3f'];
-            const borderColors = isLightTheme ? '#003d80' : '#ffd700';
+            const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            const theme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+            const colors = {
+                dark: {
+                    background: ['#4b0082', '#8a2be2', '#007bff', '#28a745', '#dc3545', '#ffd700', '#ff8c00'],
+                    border: '#ffffff'
+                },
+                light: {
+                    background: ['#007bff', '#0056b3', '#28a745', '#1e7e34', '#dc3545', '#ff8c00', '#ffd700'],
+                    border: '#000000'
+                }
+            };
 
-            // XP Weekly Bar Chart
+            // XP Chart (Bar)
+            if (document.getElementById('xp-chart-bar').chart) {
+                document.getElementById('xp-chart-bar').chart.destroy();
+            }
             const xpChartBar = new Chart(document.getElementById('xp-chart-bar'), {
                 type: 'bar',
                 data: {
-                    labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+                    labels: days,
                     datasets: [{
                         label: 'XP Ganho',
                         data: xpHistory,
-                        backgroundColor: backgroundColors[0],
-                        borderColor: borderColors,
+                        backgroundColor: colors[theme].background,
+                        borderColor: colors[theme].border,
                         borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         y: { beginAtZero: true }
                     }
                 }
             });
+            document.getElementById('xp-chart-bar').chart = xpChartBar;
 
-            // Tasks Completed Monthly Line Chart
-            const tasksPerDay = Array(30).fill(0);
+            // Tasks Completed Monthly (Line)
+            const monthlyTasks = Array(30).fill(0);
             completedTasks.forEach(task => {
                 const date = new Date(task.completedDate.split('/').reverse().join('-'));
                 const dayIndex = Math.floor((new Date() - date) / (1000 * 60 * 60 * 24));
                 if (dayIndex >= 0 && dayIndex < 30) {
-                    tasksPerDay[29 - dayIndex]++;
+                    monthlyTasks[29 - dayIndex]++;
                 }
             });
+            if (document.getElementById('tasks-chart-monthly').chart) {
+                document.getElementById('tasks-chart-monthly').chart.destroy();
+            }
             const tasksChartMonthly = new Chart(document.getElementById('tasks-chart-monthly'), {
                 type: 'line',
                 data: {
-                    labels: Array.from({ length: 30 }, (_, i) => `Dia ${30 - i}`),
+                    labels: Array(30).fill().map((_, i) => `Dia ${30 - i}`),
                     datasets: [{
                         label: 'Tasks Concluídas',
-                        data: tasksPerDay,
-                        backgroundColor: backgroundColors[1],
-                        borderColor: borderColors,
+                        data: monthlyTasks,
+                        backgroundColor: colors[theme].background[0],
+                        borderColor: colors[theme].background[1],
                         borderWidth: 2,
                         fill: false
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
-                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                        y: { beginAtZero: true }
                     }
                 }
             });
+            document.getElementById('tasks-chart-monthly').chart = tasksChartMonthly;
 
-            // XP by Category Radar Chart
+            // XP by Category (Radar)
+            if (document.getElementById('xp-chart-radar').chart) {
+                document.getElementById('xp-chart-radar').chart.destroy();
+            }
             const xpChartRadar = new Chart(document.getElementById('xp-chart-radar'), {
                 type: 'radar',
                 data: {
@@ -1921,42 +1966,56 @@
                     datasets: [{
                         label: 'XP por Categoria',
                         data: categories.map(cat => xpByCategory[cat] || 0),
-                        backgroundColor: backgroundColors[2] + '80', // Add transparency
-                        borderColor: borderColors,
+                        backgroundColor: colors[theme].background[0] + '50',
+                        borderColor: colors[theme].background[0],
                         borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         r: { beginAtZero: true }
                     }
                 }
             });
+            document.getElementById('xp-chart-radar').chart = xpChartRadar;
 
-            // Attributes Radar Chart
+            // Attribute Performance (Radar)
+            if (document.getElementById('attribute-chart-radar').chart) {
+                document.getElementById('attribute-chart-radar').chart.destroy();
+            }
             const attributeChartRadar = new Chart(document.getElementById('attribute-chart-radar'), {
                 type: 'radar',
                 data: {
-                    labels: ['Força', 'Inteligência', 'Vitalidade', 'Sabedoria', 'Destreza'],
+                    labels: ['Força', 'Inteligência', 'Vitalidade', 'Sabedoria', 'Destreza', 'Humor'],
                     datasets: [{
                         label: 'Pontos por Atributo',
-                        data: Object.values(attributesPoints),
-                        backgroundColor: backgroundColors[3] + '80', // Add transparency
-                        borderColor: borderColors,
+                        data: [
+                            attributesPoints.Força || 0,
+                            attributesPoints.Inteligência || 0,
+                            attributesPoints.Vitalidade || 0,
+                            attributesPoints.Sabedoria || 0,
+                            attributesPoints.Destreza || 0,
+                            attributesPoints.Humor || 0
+                        ],
+                        backgroundColor: colors[theme].background[1] + '50',
+                        borderColor: colors[theme].background[1],
                         borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         r: { beginAtZero: true }
                     }
                 }
             });
+            document.getElementById('attribute-chart-radar').chart = attributeChartRadar;
         }
 
-        // Initialize on page load
+        // Initialize the app
         window.onload = init;
     </script>
 </body>
