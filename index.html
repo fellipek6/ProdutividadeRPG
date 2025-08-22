@@ -1266,6 +1266,7 @@
                     updateHistory();
                 }
                 if (id === 'score-container') {
+                    updateCategoryProgress(); // Ensure categories are updated when showing score
                     updateCharts();
                     updateAttributeProgress();
                 }
@@ -1388,12 +1389,14 @@
             const newCategory = document.getElementById('new-category').value;
             if (newCategory && !categories.includes(newCategory)) {
                 categories.push(newCategory);
-                xpByCategory[newCategory] = 0;
+                xpByCategory[newCategory] = 0; // Initialize new category in xpByCategory
                 localStorage.setItem('categories', JSON.stringify(categories));
                 localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
                 document.getElementById('new-category').value = '';
                 updateCategoryCards();
                 updateCategorySelect();
+                updateCategoryProgress(); // Update progress to reflect new category
+                showToast('Categoria adicionada com sucesso!');
             } else {
                 alert('Categoria inválida ou já existe.');
             }
@@ -1403,7 +1406,7 @@
             const index = categories.indexOf(oldCat);
             if (index !== -1 && newCat && !categories.includes(newCat)) {
                 categories[index] = newCat;
-                xpByCategory[newCat] = xpByCategory[oldCat];
+                xpByCategory[newCat] = xpByCategory[oldCat] || 0;
                 delete xpByCategory[oldCat];
                 tasks.forEach(task => {
                     if (task.category === oldCat) task.category = newCat;
@@ -1418,12 +1421,15 @@
                 updateCategoryCards();
                 updateCategorySelect();
                 updateHistory();
+                updateCategoryProgress(); // Update progress to reflect edited category
+                showToast('Categoria editada com sucesso!');
             } else {
                 alert('Categoria inválida ou já existe.');
             }
         }
 
         function deleteCategory(cat) {
+            if (!window.confirm(`Deseja excluir a categoria "${cat}"? Todas as tasks associadas serão removidas.`)) return;
             categories = categories.filter(c => c !== cat);
             delete xpByCategory[cat];
             tasks = tasks.filter(task => task.category !== cat);
@@ -1435,6 +1441,8 @@
             updateCategoryCards();
             updateCategorySelect();
             updateHistory();
+            updateCategoryProgress(); // Update progress to reflect deleted category
+            showToast('Categoria excluída com sucesso!');
         }
 
         function updateCategoryCards() {
@@ -1593,6 +1601,13 @@
         function updateCategoryProgress() {
             const grid = document.getElementById('category-progress');
             grid.innerHTML = '';
+            // Ensure xpByCategory is initialized for all current categories
+            categories.forEach(cat => {
+                if (!xpByCategory[cat]) {
+                    xpByCategory[cat] = 0;
+                }
+            });
+            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
             categories.forEach(cat => {
                 const xp = xpByCategory[cat] || 0;
                 const level = Math.floor(xp / 100) + 1;
@@ -1643,6 +1658,7 @@
                 attributesPoints,
                 tasks,
                 completedTasks,
+                categories, // Include categories in saved progress
                 date: new Date().toLocaleString()
             };
             localStorage.setItem('savedProgress', JSON.stringify(savedProgress));
@@ -1665,49 +1681,80 @@
             attributesPoints = slot.attributesPoints;
             tasks = slot.tasks;
             completedTasks = slot.completedTasks;
+            categories = slot.categories || categories; // Load categories from slot if available
             localStorage.setItem('xp', xp);
             localStorage.setItem('dailyCount', dailyCount);
             localStorage.setItem('streak', streak);
             localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
             localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
-            localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
+                        localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
             localStorage.setItem('tasks', JSON.stringify(tasks));
             localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            localStorage.setItem('categories', JSON.stringify(categories));
+            updateCategorySelect();
+            updateCategoryCards();
             updateTasksGrid();
             updateMissions('all');
             updateScore();
             updateHistory();
+            updateCategoryProgress();
             showToast('Progresso carregado do slot ' + (index + 1));
         }
 
         function deleteProgress(index) {
-            if (!window.confirm('Deseja apagar o progresso salvo neste slot?')) return;
+            if (!savedProgress[index]) {
+                alert('Slot vazio!');
+                return;
+            }
+            if (!window.confirm('Deseja excluir o progresso salvo no slot ' + (index + 1) + '?')) return;
             savedProgress[index] = null;
             localStorage.setItem('savedProgress', JSON.stringify(savedProgress));
             updateSaveSlots();
-            showToast('Progresso apagado do slot ' + (index + 1));
+            showToast('Progresso do slot ' + (index + 1) + ' excluído.');
         }
 
         function updateSaveSlots() {
             const slots = document.getElementById('save-slots');
             slots.innerHTML = '';
             savedProgress.forEach((slot, index) => {
-                const card = document.createElement('div');
-                card.className = 'slot-card';
-                card.innerHTML = `
+                const slotCard = document.createElement('div');
+                slotCard.className = 'slot-card';
+                slotCard.innerHTML = `
                     <h3>Slot ${index + 1}</h3>
                     <p>${slot ? `Salvo em: ${slot.date}` : 'Vazio'}</p>
-                    ${slot ? `<button class="load-btn" onclick="loadProgress(${index})"><i class="fas fa-play"></i> Carregar</button>` : ''}
-                    ${slot ? `<button class="delete-btn" onclick="deleteProgress(${index})"><i class="fas fa-trash"></i> Apagar</button>` : ''}
-                    <button class="save-btn" onclick="saveToSlot(${index})"><i class="fas fa-save"></i> Salvar</button>
+                    ${slot ? `
+                        <button class="load-btn" onclick="loadProgress(${index})"><i class="fas fa-play"></i> Carregar</button>
+                        <button class="delete-btn" onclick="deleteProgress(${index})"><i class="fas fa-trash"></i> Excluir</button>
+                    ` : `
+                        <button class="save-btn" onclick="saveToSlot(${index})"><i class="fas fa-save"></i> Salvar</button>
+                    `}
                 `;
-                slots.appendChild(card);
+                slots.appendChild(slotCard);
             });
         }
 
+        function saveSettings() {
+            xpDaily = parseInt(document.getElementById('xp-daily').value) || 10;
+            xpWeekly = parseInt(document.getElementById('xp-weekly').value) || 50;
+            xpOneTime = parseInt(document.getElementById('xp-one-time').value) || 20;
+            difficultyMultipliers.easy = parseFloat(document.getElementById('difficulty-easy').value) || 1;
+            difficultyMultipliers.medium = parseFloat(document.getElementById('difficulty-medium').value) || 1.5;
+            difficultyMultipliers.hard = parseFloat(document.getElementById('difficulty-hard').value) || 2;
+            dailyGoal = parseInt(document.getElementById('daily-goal').value) || 5;
+            weeklyGoal = parseInt(document.getElementById('weekly-goal').value) || 200;
+            localStorage.setItem('xpDaily', xpDaily);
+            localStorage.setItem('xpWeekly', xpWeekly);
+            localStorage.setItem('xpOneTime', xpOneTime);
+            localStorage.setItem('difficultyMultipliers', JSON.stringify(difficultyMultipliers));
+            localStorage.setItem('dailyGoal', dailyGoal);
+            localStorage.setItem('weeklyGoal', weeklyGoal);
+            updateScore();
+            showToast('Configurações salvas com sucesso!');
+        }
+
         function updateHistory() {
-            const tableBody = document.getElementById('history-table-body');
-            tableBody.innerHTML = '';
+            const tbody = document.getElementById('history-table-body');
+            tbody.innerHTML = '';
             const attributeIcons = {
                 Força: 'fas fa-dumbbell',
                 Inteligência: 'fas fa-brain',
@@ -1728,16 +1775,54 @@
                     <td>${attributesHtml}</td>
                     <td>${task.completedDate}</td>
                 `;
-                tableBody.appendChild(row);
+                tbody.appendChild(row);
             });
         }
 
+        function checkReset() {
+            const today = new Date().toDateString();
+            if (lastReset !== today) {
+                tasks.forEach(task => {
+                    if (task.type === 'daily') {
+                        task.completed = false;
+                    }
+                });
+                if (dailyCount >= dailyGoal) {
+                    streak++;
+                } else {
+                    streak = 0;
+                }
+                dailyCount = 0;
+                lastReset = today;
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                localStorage.setItem('dailyCount', dailyCount);
+                localStorage.setItem('streak', streak);
+                localStorage.setItem('lastReset', lastReset);
+            }
+            const now = new Date();
+            const lastWeekly = new Date(lastWeeklyReset);
+            const daysDiff = (now - lastWeekly) / (1000 * 60 * 60 * 24);
+            if (daysDiff >= 7) {
+                xpHistory = Array(7).fill(0);
+                tasks.forEach(task => {
+                    if (task.type === 'weekly') {
+                        task.completed = false;
+                    }
+                });
+                lastWeeklyReset = today;
+                localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                localStorage.setItem('lastWeeklyReset', lastWeeklyReset);
+            }
+            updateScore();
+        }
+
         function resetAll() {
-            if (!window.confirm('Tem certeza que deseja resetar todo o progresso? Esta ação não pode ser desfeita.')) return;
+            if (!window.confirm('Deseja resetar todo o progresso? Isso apagará todas as tasks, XP e configurações.')) return;
             xp = 0;
             level = 1;
-            dailyCount = 0;
             streak = 0;
+            dailyCount = 0;
             tasks = [];
             completedTasks = [];
             xpHistory = Array(7).fill(0);
@@ -1750,125 +1835,23 @@
                 Destreza: 0,
                 Humor: 0
             };
-            categories.forEach(cat => xpByCategory[cat] = 0);
-            localStorage.setItem('xp', xp);
-            localStorage.setItem('dailyCount', dailyCount);
-            localStorage.setItem('streak', streak);
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
-            localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
+            savedProgress = Array(5).fill(null);
+            categories = ['Saúde', 'Trabalho', 'Aprendizado', 'Lazer'];
+            xpByCategory = categories.reduce((acc, cat) => ({ ...acc, [cat]: 0 }), {});
+            localStorage.clear();
+            localStorage.setItem('categories', JSON.stringify(categories));
             localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
-            localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
-            updateTasksGrid();
-            updateMissions('all');
+            init();
             updateScore();
-            updateHistory();
-            showToast('Progresso resetado!');
+            updateMissions('all');
+            showToast('Progresso resetado com sucesso!');
         }
 
         function clearCache() {
-            if (!window.confirm('Tem certeza que deseja apagar o cache? Isso limpará todas as configurações e progresso.')) return;
+            if (!window.confirm('Deseja apagar o cache? Isso resetará todas as configurações e progresso.')) return;
             localStorage.clear();
-            tasks = [];
-            categories = ['Saúde', 'Trabalho', 'Aprendizado', 'Lazer'];
-            xp = 0;
-            level = 1;
-            dailyCount = 0;
-            streak = 0;
-            xpHistory = Array(7).fill(0);
-            xpByCategory = {};
-            attributesPoints = {
-                Força: 0,
-                Inteligência: 0,
-                Vitalidade: 0,
-                Sabedoria: 0,
-                Destreza: 0,
-                Humor: 0
-            };
-            savedProgress = Array(5).fill(null);
-            xpDaily = 10;
-            xpWeekly = 50;
-            xpOneTime = 20;
-            difficultyMultipliers = { easy: 1, medium: 1.5, hard: 2 };
-            dailyGoal = 5;
-            weeklyGoal = 200;
-            categories.forEach(cat => xpByCategory[cat] = 0);
-            localStorage.setItem('categories', JSON.stringify(categories));
-            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
-            localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
-            localStorage.setItem('savedProgress', JSON.stringify(savedProgress));
-            localStorage.setItem('xpDaily', xpDaily);
-            localStorage.setItem('xpWeekly', xpWeekly);
-            localStorage.setItem('xpOneTime', xpOneTime);
-            localStorage.setItem('difficultyMultipliers', JSON.stringify(difficultyMultipliers));
-            localStorage.setItem('dailyGoal', dailyGoal);
-            localStorage.setItem('weeklyGoal', weeklyGoal);
-            updateCategoryCards();
-            updateCategorySelect();
-            updateTasksGrid();
-            updateMissions('all');
-            updateScore();
-            updateHistory();
-            showToast('Cache limpo com sucesso!');
-        }
-
-        function saveSettings() {
-            xpDaily = parseInt(document.getElementById('xp-daily').value) || 10;
-            xpWeekly = parseInt(document.getElementById('xp-weekly').value) || 50;
-            xpOneTime = parseInt(document.getElementById('xp-one-time').value) || 20;
-            difficultyMultipliers.easy = parseFloat(document.getElementById('difficulty-easy').value) || 1;
-            difficultyMultipliers.medium = parseFloat(document.getElementById('difficulty-medium').value) || 1.5;
-            difficultyMultipliers.hard = parseFloat(document.getElementById('difficulty-hard').value) || 2;
-            dailyGoal = parseInt(document.getElementById('daily-goal').value) || 5;
-            weeklyGoal = parseInt(document.getElementById('weekly-goal').value) || 200;
-            localStorage.setItem('xpDaily', xpDaily);
-            localStorage.setItem('xpWeekly', xpWeekly);
-            localStorage.setItem('xpOneTime', xpOneTime);
-            localStorage.setItem('difficultyMultipliers', JSON.stringify(difficultyMultipliers));
-            localStorage.setItem('dailyGoal', dailyGoal);
-            localStorage.setItem('weeklyGoal', weeklyGoal);
-            updateScore();
-            showToast('Configurações salvas!');
-        }
-
-        function checkReset() {
-            const today = new Date().toDateString();
-            if (lastReset !== today) {
-                tasks.forEach(task => {
-                    if (task.type === 'daily') task.completed = false;
-                });
-                const completedToday = completedTasks.filter(task => task.completedDate === new Date().toLocaleDateString('pt-BR')).length;
-                streak = completedToday >= dailyGoal ? streak + 1 : 0;
-                dailyCount = 0;
-                lastReset = today;
-                localStorage.setItem('lastReset', lastReset);
-                localStorage.setItem('dailyCount', dailyCount);
-                localStorage.setItem('streak', streak);
-                localStorage.setItem('tasks', JSON.stringify(tasks));
-                updateTasksGrid();
-                updateMissions('all');
-                updateScore();
-            }
-            const currentWeek = getWeekNumber(new Date());
-            const lastWeek = lastWeeklyReset ? getWeekNumber(new Date(lastWeeklyReset)) : currentWeek;
-            if (currentWeek !== lastWeek) {
-                tasks.forEach(task => {
-                    if (task.type === 'weekly') task.completed = false;
-                });
-                lastWeeklyReset = today;
-                localStorage.setItem('lastWeeklyReset', lastWeeklyReset);
-                localStorage.setItem('tasks', JSON.stringify(tasks));
-                updateTasksGrid();
-                updateMissions('all');
-                updateScore();
-            }
-        }
-
-        function getWeekNumber(d) {
-            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDate() % 7));
-            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            init();
+            showToast('Cache apagado com sucesso!');
         }
 
         function showToast(message) {
@@ -1881,142 +1864,141 @@
         }
 
         function updateCharts() {
-            const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
             const theme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
-            const colors = {
-                dark: {
-                    background: ['#4b0082', '#8a2be2', '#007bff', '#28a745', '#dc3545', '#ffd700', '#ff8c00'],
-                    border: '#ffffff'
-                },
-                light: {
-                    background: ['#007bff', '#0056b3', '#28a745', '#1e7e34', '#dc3545', '#ff8c00', '#ffd700'],
-                    border: '#000000'
-                }
-            };
+            const textColor = theme === 'light' ? '#000' : '#fff';
+            const gridColor = theme === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
 
-            // XP Chart (Bar)
-            if (document.getElementById('xp-chart-bar').chart) {
-                document.getElementById('xp-chart-bar').chart.destroy();
-            }
-            const xpChartBar = new Chart(document.getElementById('xp-chart-bar'), {
+            // Bar chart for weekly XP
+            const xpChartBar = new Chart(document.getElementById('xp-chart-bar').getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: days,
+                    labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
                     datasets: [{
                         label: 'XP Ganho',
                         data: xpHistory,
-                        backgroundColor: colors[theme].background,
-                        borderColor: colors[theme].border,
+                        backgroundColor: 'rgba(75, 0, 130, 0.6)',
+                        borderColor: '#4b0082',
                         borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: true,
                     scales: {
-                        y: { beginAtZero: true }
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
+                        },
+                        x: {
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: textColor } }
                     }
                 }
             });
-            document.getElementById('xp-chart-bar').chart = xpChartBar;
 
-            // Tasks Completed Monthly (Line)
-            const monthlyTasks = Array(30).fill(0);
-            completedTasks.forEach(task => {
-                const date = new Date(task.completedDate.split('/').reverse().join('-'));
-                const dayIndex = Math.floor((new Date() - date) / (1000 * 60 * 60 * 24));
-                if (dayIndex >= 0 && dayIndex < 30) {
-                    monthlyTasks[29 - dayIndex]++;
-                }
-            });
-            if (document.getElementById('tasks-chart-monthly').chart) {
-                document.getElementById('tasks-chart-monthly').chart.destroy();
-            }
-            const tasksChartMonthly = new Chart(document.getElementById('tasks-chart-monthly'), {
+            // Line chart for monthly tasks
+            const daysInMonth = Array.from({ length: 30 }, (_, i) => i + 1);
+            const tasksPerDay = daysInMonth.map(() => Math.floor(Math.random() * 10));
+            const tasksChartMonthly = new Chart(document.getElementById('tasks-chart-monthly').getContext('2d'), {
                 type: 'line',
                 data: {
-                    labels: Array(30).fill().map((_, i) => `Dia ${30 - i}`),
+                    labels: daysInMonth,
                     datasets: [{
                         label: 'Tasks Concluídas',
-                        data: monthlyTasks,
-                        backgroundColor: colors[theme].background[0],
-                        borderColor: colors[theme].background[1],
-                        borderWidth: 2,
-                        fill: false
+                        data: tasksPerDay,
+                        borderColor: '#ff00ff',
+                        backgroundColor: 'rgba(255, 0, 255, 0.2)',
+                        fill: true
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: true,
                     scales: {
-                        y: { beginAtZero: true }
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
+                        },
+                        x: {
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: textColor } }
                     }
                 }
             });
-            document.getElementById('tasks-chart-monthly').chart = tasksChartMonthly;
 
-            // XP by Category (Radar)
-            if (document.getElementById('xp-chart-radar').chart) {
-                document.getElementById('xp-chart-radar').chart.destroy();
-            }
-            const xpChartRadar = new Chart(document.getElementById('xp-chart-radar'), {
+            // Radar chart for categories
+            const xpChartRadar = new Chart(document.getElementById('xp-chart-radar').getContext('2d'), {
                 type: 'radar',
                 data: {
                     labels: categories,
                     datasets: [{
                         label: 'XP por Categoria',
                         data: categories.map(cat => xpByCategory[cat] || 0),
-                        backgroundColor: colors[theme].background[0] + '50',
-                        borderColor: colors[theme].background[0],
+                        backgroundColor: 'rgba(138, 43, 226, 0.2)',
+                        borderColor: '#8a2be2',
                         borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: true,
                     scales: {
-                        r: { beginAtZero: true }
+                        r: {
+                            beginAtZero: true,
+                            ticks: { color: textColor },
+                            grid: { color: gridColor },
+                            pointLabels: { color: textColor }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: textColor } }
                     }
                 }
             });
-            document.getElementById('xp-chart-radar').chart = xpChartRadar;
 
-            // Attribute Performance (Radar)
-            if (document.getElementById('attribute-chart-radar').chart) {
-                document.getElementById('attribute-chart-radar').chart.destroy();
-            }
-            const attributeChartRadar = new Chart(document.getElementById('attribute-chart-radar'), {
+            // Radar chart for attributes
+            const attributeChartRadar = new Chart(document.getElementById('attribute-chart-radar').getContext('2d'), {
                 type: 'radar',
                 data: {
                     labels: ['Força', 'Inteligência', 'Vitalidade', 'Sabedoria', 'Destreza', 'Humor'],
                     datasets: [{
                         label: 'Pontos por Atributo',
-                        data: [
-                            attributesPoints.Força || 0,
-                            attributesPoints.Inteligência || 0,
-                            attributesPoints.Vitalidade || 0,
-                            attributesPoints.Sabedoria || 0,
-                            attributesPoints.Destreza || 0,
-                            attributesPoints.Humor || 0
-                        ],
-                        backgroundColor: colors[theme].background[1] + '50',
-                        borderColor: colors[theme].background[1],
+                        data: Object.values(attributesPoints),
+                        backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                        borderColor: '#ffd700',
                         borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: true,
                     scales: {
-                        r: { beginAtZero: true }
+                        r: {
+                            beginAtZero: true,
+                            ticks: { color: textColor },
+                            grid: { color: gridColor },
+                            pointLabels: { color: textColor }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: textColor } }
                     }
                 }
             });
-            document.getElementById('attribute-chart-radar').chart = attributeChartRadar;
         }
 
         // Initialize the app
-        window.onload = init;
+        init();
     </script>
 </body>
 </html>
