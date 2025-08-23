@@ -908,7 +908,7 @@
                 <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
                 <button class="icon-btn" onclick="exportSaveData()" title="Exportar Dados"><i class="fas fa-download"></i> Exportar</button>
                 <button class="icon-btn" onclick="document.getElementById('file-input').click()" title="Importar Dados"><i class="fas fa-upload"></i> Importar</button>
-                <input type="file" id="file-input" accept=".data" style="display: none;" onchange="handleFileSelect(event)">
+                <input type="file" id="file-input" accept=".json" style="display: none;" onchange="handleFileSelect(event)">
                 <p id="file-name" class="file-name">Nenhum arquivo selecionado</p>
                 <button class="icon-btn submit-btn" onclick="importSaveData()" id="submit-file" style="display: none;"><i class="fas fa-check"></i> Enviar</button>
             </div>
@@ -1876,7 +1876,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'save.data';
+            a.download = 'save.json';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
