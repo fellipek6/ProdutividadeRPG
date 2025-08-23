@@ -481,6 +481,99 @@
         body.light-theme .history-table tr:nth-child(even) { background: #e6f0fa; }
         .settings-actions { display: flex; gap: 8px; grid-column: span 2; justify-content: center; align-items: center; flex-wrap: wrap; }
         .button-container { display: flex; gap: 8px; grid-column: span 2; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 20px; }
+        .sub-tabs, .filter-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .sub-tab-btn, .filter-btn {
+            background: linear-gradient(135deg, #0288d1, #0277bd);
+            color: #e0e0e0;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: clamp(10px, 2.5vw, 12px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.3s, background 0.3s;
+        }
+        
+        body.light-theme .sub-tab-btn, body.light-theme .filter-btn {
+            background: linear-gradient(135deg, #42a5f5, #0288d1);
+            color: #333;
+        }
+        
+        .sub-tab-btn:hover, .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        
+        .sub-tab-btn.active, .filter-btn.active {
+            background: linear-gradient(135deg, #388e3c, #2e7d32);
+        }
+        
+        body.light-theme .sub-tab-btn.active, body.light-theme .filter-btn.active {
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+        }
+        
+        .task-total-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            overflow-y: hidden;
+            overflow-x: hidden; /* Already present, keep it */
+            max-height: 400px;
+            width: 100%; /* Ensure it takes full width of parent */
+            box-sizing: border-box; /* Ensure padding/borders are included in width */
+        }
+        
+        .task-total-card {
+            background: linear-gradient(135deg, #424242, #212121);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            transition: transform 0.2s;
+            flex: 1 1 clamp(140px, 30vw, 160px); /* Keep flexible sizing */
+            max-width: 100%; /* Prevent cards from exceeding container width */
+            min-width: 0; /* Allow cards to shrink if needed */
+            text-align: center;
+            box-sizing: border-box; /* Include padding/borders in width */
+        }
+        
+         body.light-theme .task-total-card {
+            background: linear-gradient(135deg, #e6f0fa, #d9e7f7);
+        }
+        
+        .task-total-card:hover {
+            transform: scale(1.05);
+        }
+        
+        .task-total-card h4 {
+            margin-bottom: 5px;
+        }
+        
+        .task-total-card p {
+            margin: 3px 0;
+            font-size: clamp(10px, 2.2vw, 12px);
+        }
+        
+        /* Ensure no horizontal scrollbar on smaller screens */
+        @media (max-width: 600px) {
+            .task-total-card {
+                flex: 1 1 clamp(120px, 45vw, 140px); /* Adjust for smaller screens */
+                max-width: 100%; /* Ensure it fits within container */
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .task-total-card {
+                flex: 1 1 100%; /* Full width on very small screens */
+                max-width: 100%; /* Ensure it fits */
+            }
+        }
     </style>
 </head>
 <body>
@@ -581,19 +674,32 @@
             <button class="reset-btn" onclick="resetAll()" title="Resetar Progresso"><i class="fas fa-redo"></i> Resetar Tudo</button>
         </div>
     </div>
-    <div class="container history-section" id="history-container" style="display: none;">
-        <h2>Histórico de Tasks Concluídas</h2>
-        <table class="history-table">
-            <thead>
-                <tr><th>Nome</th><th>Categoria</th><th>Tipo</th><th>Total (%)</th><th>Data</th></tr>
-            </thead>
-            <tbody id="history-table-body"></tbody>
-        </table>
-        <div class="button-container">
-            <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
-            <button class="reset-btn" onclick="clearHistory()" title="Apagar Histórico"><i class="fas fa-trash"></i> Apagar Histórico</button>
+        <div class="container history-section" id="history-container" style="display: none;">
+            <h2>Histórico de Tasks Concluídas</h2>
+            <div class="sub-tabs">
+                <button class="sub-tab-btn active" onclick="showHistoryView('table')">Tabela</button>
+                <button class="sub-tab-btn" onclick="showHistoryView('total')">Cards</button>
+            </div>
+            <div id="history-table-view">
+                <table class="history-table">
+                    <thead>
+                        <tr><th>Nome</th><th>Categoria</th><th>Tipo</th><th>Total (%)</th><th>Data</th></tr>
+                    </thead>
+                    <tbody id="history-table-body"></tbody>
+                </table>
+            </div>
+            <div id="task-total-view" style="display: none;">
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterTaskTotals('repetitivo')">Repetitivo</button>
+                    <button class="filter-btn" onclick="filterTaskTotals('unica')">Task Única</button>
+                </div>
+                <div class="task-total-grid" id="task-total-grid"></div>
+            </div>
+            <div class="button-container">
+                <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
+                <button class="reset-btn" onclick="clearHistory()" title="Apagar Histórico"><i class="fas fa-trash"></i> Apagar Histórico</button>
+            </div>
         </div>
-    </div>
     <div class="container settings-section" id="settings-container" style="display: none;">
         <h2>Configurações</h2>
         <div class="form-container">
@@ -707,7 +813,7 @@
                     document.getElementById('header').style.display = 'flex';
                     document.getElementById('xp-bar').style.display = 'block';
                 }
-                if (id === 'history-container') updateHistory();
+                if (id === 'history-container') {showHistoryView('table')};
                 if (id === 'score-container') { updateCategoryProgress(); updateCharts(); updateAttributeProgress(); }
                 if (id === 'tasks-container') resetAttributeButtons();
             }
@@ -1359,6 +1465,70 @@
             updateHistory();
             showToast('Histórico apagado!');
         }
+        
+        let currentHistoryView = 'table';
+        let currentFilter = 'repetitivo';
+        
+        function showHistoryView(view) {
+            currentHistoryView = view;
+            document.getElementById('history-table-view').style.display = view === 'table' ? 'block' : 'none';
+            document.getElementById('task-total-view').style.display = view === 'total' ? 'block' : 'none';
+            document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.sub-tab-btn[onclick="showHistoryView('${view}')"]`).classList.add('active');
+            if (view === 'table') {
+                updateHistory();
+            } else {
+                updateTaskTotals();
+            }
+        }
+        
+        function filterTaskTotals(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.filter-btn[onclick="filterTaskTotals('${filter}')"]`).classList.add('active');
+            updateTaskTotals();
+        }
+        
+        function updateTaskTotals() {
+            const grid = document.getElementById('task-total-grid');
+            grid.innerHTML = '';
+            
+            // Group by task name
+            const taskGroups = completedTasks.reduce((acc, task) => {
+                if (!acc[task.name]) {
+                    acc[task.name] = { count: 0, totalXP: 0, type: task.type };
+                }
+                acc[task.name].count++;
+                acc[task.name].totalXP += task.points || 0; // Use 0 if points not stored (for old data)
+                return acc;
+            }, {});
+            
+            // Filter based on currentFilter
+            const filteredGroups = Object.entries(taskGroups).filter(([name, data]) => {
+                if (currentFilter === 'repetitivo') {
+                    return data.type === 'Diário' || data.type === 'Semanal';
+                } else {
+                    return data.type === 'Única';
+                }
+            });
+            
+            // Render cards
+            filteredGroups.forEach(([name, data]) => {
+                const card = document.createElement('div');
+                card.className = 'task-total-card';
+                card.innerHTML = `
+                    <h4>${name}</h4>
+                    <p>Vezes Feita: ${data.count}</p>
+                    <p>XP Total: ${data.totalXP}</p>
+                `;
+                grid.appendChild(card);
+            });
+            
+            if (filteredGroups.length === 0) {
+                grid.innerHTML = '<p>Nenhuma task encontrada.</p>';
+            }
+        }
+        
         window.addEventListener('load', () => {
             init();
             const savedTheme = localStorage.getItem('theme');
