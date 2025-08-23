@@ -743,6 +743,92 @@
         body.light-theme .task-total-card .icons i:hover {
             color: #0056b3;
         }
+        
+        .task-card.edit-mode {
+            padding: 10px;
+            position: relative;
+        }
+        
+        .task-card .edit-form {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .task-card .edit-form input,
+        .task-card .edit-form select {
+            padding: 5px;
+            font-size: clamp(10px, 2.2vw, 12px);
+            border-radius: 5px;
+            border: 1px solid #ffd700;
+            background: #424242;
+            color: #e0e0e0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        body.light-theme .task-card .edit-form input,
+        body.light-theme .task-card .edit-form select {
+            background: #e6f0fa;
+            color: #333;
+            border: 1px solid #007bff;
+        }
+        
+        .task-card .edit-form .attribute-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: clamp(6px, 1.5vw, 8px);
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .task-card .edit-form button {
+            background: linear-gradient(135deg, #388e3c, #2e7d32);
+            color: #e0e0e0;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-size: clamp(10px, 2.2vw, 12px);
+            margin-top: 8px;
+        }
+        
+        body.light-theme .task-card .edit-form button {
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+            color: #333;
+        }
+        
+        .task-card .edit-form button.cancel-btn {
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+        }
+        
+        body.light-theme .task-card .edit-form button.cancel-btn {
+            background: linear-gradient(135deg, #ef5350, #d32f2f);
+        }
+        
+        .task-card .edit-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+
+
+        .task-card .edit-form .attribute-buttons .attribute-btn.selected {
+            background: linear-gradient(135deg, #ffb300, #ff8f00); /* Amarelo para tema escuro */
+            border-color: #ffb300; /* Borda amarela */
+            transform: scale(1.05);
+        }
+        
+        body.light-theme .task-card .edit-form .attribute-buttons .attribute-btn.selected {
+            background: linear-gradient(135deg, #ffca28, #ffb300); /* Amarelo mais claro para tema claro */
+            border-color: #ffca28; /* Borda amarela mais clara */
+        }
+
+
     </style>
 </head>
 <body>
@@ -976,7 +1062,11 @@
             updateSaveSlots();
         }
 
-        function toggleAttribute(event) { event.currentTarget.classList.toggle('selected'); }
+        function toggleAttribute(event) {
+            const btn = event.currentTarget;
+            btn.classList.toggle('selected');
+            console.log(`Botão de atributo ${btn.getAttribute('data-attribute')} clicado. Estado: ${btn.classList.contains('selected') ? 'selecionado' : 'não selecionado'}`);
+        }
 
         function resetAttributeButtons() { document.querySelectorAll('.attribute-btn').forEach(btn => btn.classList.remove('selected')); }
 
@@ -1092,27 +1182,116 @@
         function updateTasksGrid() {
             const grid = document.getElementById('tasks-grid');
             grid.innerHTML = '';
-            const attributeIcons = { Força: 'fas fa-dumbbell', Inteligência: 'fas fa-brain', Vitalidade: 'fas fa-heart', Sabedoria: 'fas fa-book', Destreza: 'fas fa-running', Humor: 'fas fa-smile' };
+            const attributeIcons = {
+                Força: 'fas fa-dumbbell',
+                Inteligência: 'fas fa-brain',
+                Vitalidade: 'fas fa-heart',
+                Sabedoria: 'fas fa-book',
+                Destreza: 'fas fa-running',
+                Humor: 'fas fa-smile'
+            };
             tasks.forEach((task, index) => {
                 const displayType = task.type === 'daily' ? 'Diário' : task.type === 'weekly' ? 'Semanal' : 'Única';
                 const attributesHtml = task.attributes.map(attr => `<i class="${attributeIcons[attr]}" title="${attr}"></i>`).join('');
                 const card = document.createElement('div');
                 card.className = 'task-card';
                 card.innerHTML = `
-                    <span>${task.name} (${task.category} - ${displayType})</span>
-                    <div class="attributes">${attributesHtml}</div>
-                    <div class="icons">
-                        <i class="fas fa-edit" onclick="promptEditTask(${index})" title="Editar"></i>
-                        <i class="fas fa-trash" onclick="deleteTask(${index})" title="Excluir"></i>
+                    <div class="task-content">
+                        <span>${task.name} (${task.category} - ${displayType})</span>
+                        <div class="attributes">${attributesHtml}</div>
+                        <div class="icons">
+                            <i class="fas fa-edit" onclick="showEditForm(${index})" title="Editar"></i>
+                            <i class="fas fa-trash" onclick="deleteTask(${index})" title="Excluir"></i>
+                        </div>
+                    </div>
+                    <div class="edit-form" id="edit-form-${index}" style="display: none;">
+                        <input type="text" id="edit-task-name-${index}" value="${task.name}" placeholder="Nome da task">
+                        <select id="edit-task-category-${index}">
+                            ${categories.map(cat => `<option value="${cat}" ${task.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                        </select>
+                        <select id="edit-task-type-${index}">
+                            <option value="Diário" ${task.type === 'daily' ? 'selected' : ''}>Diário</option>
+                            <option value="Semanal" ${task.type === 'weekly' ? 'selected' : ''}>Semanal</option>
+                            <option value="Única" ${task.type === 'one-time' ? 'selected' : ''}>Única</option>
+                        </select>
+                        <select id="edit-task-difficulty-${index}">
+                            <option value="1" ${task.difficulty === 1 ? 'selected' : ''}>Baixa</option>
+                            <option value="1.5" ${task.difficulty === 1.5 ? 'selected' : ''}>Média</option>
+                            <option value="2" ${task.difficulty === 2 ? 'selected' : ''}>Alta</option>
+                        </select>
+                        <div class="attribute-buttons">
+                            ${Object.keys(attributeIcons).map(attr => `
+                                <button type="button" class="attribute-btn ${task.attributes.includes(attr) ? 'selected' : ''}" data-attribute="${attr}">
+                                    <i class="${attributeIcons[attr]}"></i> ${attr}
+                                </button>
+                            `).join('')}
+                        </div>
+                        <button onclick="saveTaskEdit(${index})">Salvar</button>
+                        <button class="cancel-btn" onclick="cancelTaskEdit(${index})">Cancelar</button>
                     </div>
                 `;
                 grid.appendChild(card);
+                // Adicionar eventos de clique aos botões de atributos no formulário de edição
+                card.querySelectorAll('.edit-form .attribute-btn').forEach(btn => {
+                    // Remover eventos anteriores para evitar duplicação
+                    const newBtn = btn.cloneNode(true); // Clonar o botão para evitar eventos duplicados
+                    btn.parentNode.replaceChild(newBtn, btn);
+                    newBtn.addEventListener('click', toggleAttribute);
+                });
             });
         }
 
-        function promptEditTask(index) {
-            const newName = prompt('Editar nome da task:', tasks[index].name);
-            if (newName !== null) editTask(index, newName);
+
+        function showEditForm(index) {
+            // Ocultar todos os formulários de edição
+            document.querySelectorAll('.edit-form').forEach(form => form.style.display = 'none');
+            document.querySelectorAll('.task-content').forEach(content => content.style.display = 'block');
+            document.querySelectorAll('.task-card').forEach(card => card.classList.remove('edit-mode'));
+            
+            // Mostrar o formulário de edição do card clicado
+            const form = document.getElementById(`edit-form-${index}`);
+            const content = document.querySelectorAll('.task-content')[index];
+            const card = form.closest('.task-card');
+            form.style.display = 'flex';
+            content.style.display = 'none';
+            card.classList.add('edit-mode');
+        }
+        
+        function saveTaskEdit(index) {
+            const name = document.getElementById(`edit-task-name-${index}`).value.trim();
+            const category = document.getElementById(`edit-task-category-${index}`).value;
+            const typeDisplay = document.getElementById(`edit-task-type-${index}`).value;
+            const difficulty = parseFloat(document.getElementById(`edit-task-difficulty-${index}`).value);
+            const attributes = Array.from(document.getElementById(`edit-form-${index}`).querySelectorAll('.attribute-btn.selected')).map(btn => btn.getAttribute('data-attribute'));
+        
+            console.log(`Salvando task ${index}: Nome=${name}, Categoria=${category}, Tipo=${typeDisplay}, Dificuldade=${difficulty}, Atributos=${attributes}`);
+        
+            if (!name) return showToast('Insira o nome da task.');
+            if (!category) return showToast('Selecione uma categoria.');
+            if (attributes.length === 0) return showToast('Selecione pelo menos um atributo.');
+        
+            tasks[index] = {
+                ...tasks[index],
+                name,
+                category,
+                type: typeDisplay === 'Diário' ? 'daily' : typeDisplay === 'Semanal' ? 'weekly' : 'one-time',
+                difficulty,
+                attributes
+            };
+        
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            updateTasksGrid();
+            updateMissions(currentCategory);
+            showToast('Task editada com sucesso!');
+        }
+        
+        function cancelTaskEdit(index) {
+            const form = document.getElementById(`edit-form-${index}`);
+            const content = document.querySelectorAll('.task-content')[index];
+            const card = form.closest('.task-card');
+            form.style.display = 'none';
+            content.style.display = 'block';
+            card.classList.remove('edit-mode');
         }
 
         function addCategory() {
