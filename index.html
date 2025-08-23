@@ -187,21 +187,27 @@
             .start-tasks-btn { padding: clamp(8px, 2vw, 10px) clamp(15px, 3.5vw, 20px); font-size: clamp(11px, 2.2vw, 13px); }
         }
         .score-section, .settings-section, .tasks-section, .history-section, .main-menu { display: none; }
-        .back-btn {
+        .back-btn, .reset-btn {
             background: linear-gradient(135deg, #d32f2f, #b71c1c);
             color: #e0e0e0;
             border: none;
-            padding: clamp(5px, 1.2vw, 7px) clamp(10px, 2vw, 12px);
+            padding: clamp(10px, 2vw, 12px) clamp(20px, 4vw, 24px);
             border-radius: 8px;
             cursor: pointer;
-            margin: 8px 0;
             transition: transform 0.3s, box-shadow 0.3s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            font-size: clamp(10px, 2.5vw, 12px);
+            font-size: clamp(12px, 2.5vw, 14px);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            justify-content: center;
+            width: clamp(150px, 30vw, 180px);
         }
-        body.light-theme .back-btn { background: linear-gradient(135deg, #ef5350, #d32f2f); color: #333; }
-        .back-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.4); }
-        .reset-btn, .save-settings-btn {
+        body.light-theme .back-btn, body.light-theme .reset-btn { background: linear-gradient(135deg, #ef5350, #d32f2f); color: #333; }
+        .back-btn:hover, .reset-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.4); }
+        .reset-btn { background: linear-gradient(135deg, #388e3c, #2e7d32); }
+        body.light-theme .reset-btn { background: linear-gradient(135deg, #4caf50, #388e3c); }
+        .save-settings-btn {
             background: linear-gradient(135deg, #388e3c, #2e7d32);
             color: #e0e0e0;
             border: none;
@@ -216,8 +222,8 @@
             gap: 4px;
             justify-content: center;
         }
-        body.light-theme .reset-btn, body.light-theme .save-settings-btn { background: linear-gradient(135deg, #4caf50, #388e3c); color: #333; }
-        .reset-btn:hover, .save-settings-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.4); }
+        body.light-theme .save-settings-btn { background: linear-gradient(135deg, #4caf50, #388e3c); color: #333; }
+        .save-settings-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.4); }
         .form-container { border: 2px solid #ffd700; border-radius: 8px; padding: 12px; margin-bottom: 12px; width: 100%; }
         body.light-theme .form-container { border: 2px solid #007bff; }
         .form-group { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 12px; }
@@ -467,6 +473,7 @@
         .history-table tr:nth-child(even) { background: #212121; }
         body.light-theme .history-table tr:nth-child(even) { background: #e6f0fa; }
         .settings-actions { display: flex; gap: 8px; grid-column: span 2; justify-content: center; align-items: center; flex-wrap: wrap; }
+        .button-container { display: flex; gap: 8px; grid-column: span 2; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -536,7 +543,9 @@
         </div>
         <h3>Tasks Cadastradas</h3>
         <div class="tasks-grid" id="tasks-grid"></div>
-        <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
+        <div class="button-container">
+            <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
+        </div>
     </div>
     <div class="container score-section" id="score-container" style="display: none;">
         <h2>Seu Progresso</h2>
@@ -553,16 +562,16 @@
         <div class="missions-grid" id="category-progress"></div>
         <h3>Progresso por Atributo</h3>
         <div class="missions-grid" id="attribute-progress"></div>
-        <div style="grid-column: span 2; display: flex; align-items: center; justify-content: center;">
+        <div class="charts-container">
+            <div><h3>Gráfico de XP Semanal</h3><canvas id="xp-chart-bar" width="400" height="300"></canvas></div>
+            <div><h3>Tasks Concluídas (Mensal)</h3><canvas id="tasks-chart-monthly" width="400" height="300"></canvas></div>
+            <div><h3>Tasks Concluídas (Anual)</h3><canvas id="tasks-chart-yearly" width="400" height="300"></canvas></div>
+            <div><h3>Desempenho por Categoria</h3><canvas id="xp-chart-radar" width="400" height="300"></canvas></div>
+            <div><h3>Desempenho por Atributo</h3><canvas id="attribute-chart-radar" width="400" height="300"></canvas></div>
+        </div>
+        <div class="button-container">
             <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
             <button class="reset-btn" onclick="resetAll()" title="Resetar Progresso"><i class="fas fa-redo"></i> Resetar Tudo</button>
-        </div>
-        <div class="charts-container">
-            <div><h3>Gráfico de XP Semanal</h3><canvas id="xp-chart-bar"></canvas></div>
-            <div><h3>Tasks Concluídas (Mensal)</h3><canvas id="tasks-chart-monthly"></canvas></div>
-            <div><h3>Tasks Concluídas (Anual)</h3><canvas id="tasks-chart-yearly"></canvas></div>
-            <div><h3>Desempenho por Categoria</h3><canvas id="xp-chart-radar"></canvas></div>
-            <div><h3>Desempenho por Atributo</h3><canvas id="attribute-chart-radar"></canvas></div>
         </div>
     </div>
     <div class="container history-section" id="history-container" style="display: none;">
@@ -573,7 +582,9 @@
             </thead>
             <tbody id="history-table-body"></tbody>
         </table>
-        <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
+        <div class="button-container">
+            <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
+        </div>
     </div>
     <div class="container settings-section" id="settings-container" style="display: none;">
         <h2>Configurações</h2>
@@ -600,7 +611,7 @@
                 <button class="reset-btn" type="button" onclick="resetAll()"><i class="fas fa-redo"></i> Resetar Tudo</button>
             </div>
         </div>
-        <div class="settings-actions">
+        <div class="button-container">
             <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
         </div>
     </div>
@@ -1152,70 +1163,54 @@
             if (charts.tasksChartYearly) charts.tasksChartYearly.destroy();
             charts.tasksChartYearly = new Chart(document.getElementById('tasks-chart-yearly'), {
                 type: 'bar',
-                data: { labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'], datasets: [{ label: 'Tasks Concluídas (Anual)', data: yearlyTasks, backgroundColor, borderColor, borderWidth: 1 }] },
+                 data: { labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'], datasets: [{ label: 'Tasks Concluídas (Anual)', data: yearlyTasks, backgroundColor, borderColor, borderWidth: 1 }] },
                 options: { scales: { y: { beginAtZero: true } } }
             });
             if (charts.xpChartRadar) charts.xpChartRadar.destroy();
             charts.xpChartRadar = new Chart(document.getElementById('xp-chart-radar'), {
                 type: 'radar',
-                data: { labels: categories, datasets: [{ label: 'XP por Categoria', data: categories.map(cat => xpByCategory[cat] || 0), backgroundColor, borderColor, borderWidth: 1 }] },
+                data: { 
+                    labels: categories, 
+                    datasets: [{ 
+                        label: 'XP por Categoria', 
+                        data: categories.map(cat => xpByCategory[cat] || 0), 
+                        backgroundColor: backgroundColor.replace('0.5', '0.2'), 
+                        borderColor, 
+                        borderWidth: 1 
+                    }]
+                },
                 options: { scales: { r: { beginAtZero: true } } }
             });
             if (charts.attributeChartRadar) charts.attributeChartRadar.destroy();
             charts.attributeChartRadar = new Chart(document.getElementById('attribute-chart-radar'), {
                 type: 'radar',
-                data: {
-                    labels: Object.keys(attributesPoints),
-                    datasets: [{
-                        label: 'XP por Atributo',
-                        data: Object.values(attributesPoints),
-                        backgroundColor,
-                        borderColor,
-                        borderWidth: 1
+                data: { 
+                    labels: Object.keys(attributesPoints), 
+                    datasets: [{ 
+                        label: 'XP por Atributo', 
+                        data: Object.values(attributesPoints), 
+                        backgroundColor: backgroundColor.replace('0.5', '0.2'), 
+                        borderColor, 
+                        borderWidth: 1 
                     }]
                 },
                 options: { scales: { r: { beginAtZero: true } } }
             });
         }
 
-        // Initialize the application on page load
-        window.onload = init;
+        window.addEventListener('load', () => {
+            init();
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+                document.querySelector('.theme-btn i').className = 'fas fa-moon';
+            }
+            const inputs = document.querySelectorAll('input[type="range"]');
+            inputs.forEach(input => input.style.setProperty('--value', input.value + '%'));
+        });
 
-        // Handle window resize for responsive adjustments
         window.addEventListener('resize', () => {
-            updateMissions(document.getElementById('category-select').querySelector('.start-mission-btn.active')?.textContent || 'all');
             updateCharts();
-        });
-
-        // Add keyboard accessibility for buttons
-        document.querySelectorAll('button, .attribute-btn').forEach(btn => {
-            btn.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    btn.click();
-                }
-            });
-        });
-
-        // Ensure sliders update their value display in real-time
-        document.addEventListener('input', (e) => {
-            if (e.target.type === 'range') {
-                e.target.style.setProperty('--value', e.target.value + '%');
-                e.target.nextElementSibling.textContent = `${e.target.value}%`;
-            }
-        });
-
-        // Prevent default form submission
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', (e) => e.preventDefault());
-        });
-
-        // Add active state to category buttons
-        document.getElementById('category-select').addEventListener('click', (e) => {
-            if (e.target.classList.contains('start-mission-btn')) {
-                document.querySelectorAll('.start-mission-btn').forEach(btn => btn.classList.remove('active'));
-                e.target.classList.add('active');
-            }
         });
     </script>
 </body>
