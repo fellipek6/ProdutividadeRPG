@@ -1072,7 +1072,8 @@
 
         function resetAll() {
             if (!confirm('Resetar todo o progresso? Isso não pode ser desfeito.')) return;
-            tasks = [];
+            
+            // Resetar variáveis de progresso
             xp = 0;
             level = 1;
             dailyCount = 0;
@@ -1083,16 +1084,39 @@
             xpByCategory = {};
             attributesPoints = { Força: 0, Inteligência: 0, Vitalidade: 0, Sabedoria: 0, Destreza: 0, Humor: 0 };
             completedTasks = [];
+        
+            // Resetar progresso das tarefas existentes (mantendo as tarefas)
+            tasks = tasks.map(task => ({
+                ...task,
+                completed: false,
+                progress: 0,
+                lastCompleted: null
+            }));
+        
+            // Inicializar xpByCategory para todas as categorias existentes
             categories.forEach(cat => { xpByCategory[cat] = 0; });
-            localStorage.clear();
-            localStorage.setItem('categories', JSON.stringify(categories));
+        
+            // Salvar no localStorage
+            localStorage.setItem('xp', xp);
+            localStorage.setItem('level', level);
+            localStorage.setItem('dailyCount', dailyCount);
+            localStorage.setItem('streak', streak);
+            localStorage.setItem('lastReset', lastReset);
+            localStorage.setItem('lastWeeklyReset', lastWeeklyReset);
+            localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
             localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
+            localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('categories', JSON.stringify(categories));
             localStorage.setItem('xpDaily', xpDaily);
             localStorage.setItem('xpWeekly', xpWeekly);
             localStorage.setItem('xpOneTime', xpOneTime);
             localStorage.setItem('difficultyMultipliers', JSON.stringify(difficultyMultipliers));
             localStorage.setItem('dailyGoal', dailyGoal);
             localStorage.setItem('weeklyGoal', weeklyGoal);
+        
+            // Atualizar a interface
             updateCategorySelect();
             updateCategoryCards();
             updateTasksGrid();
