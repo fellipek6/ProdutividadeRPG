@@ -15,8 +15,8 @@
         }
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #001f3f;
-            color: #fff;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -26,11 +26,11 @@
         }
         body.light-theme {
             background-color: #f4f7fa;
-            color: #000;
+            color: #333;
         }
         header {
-            background-color: #000f1f;
-            color: white;
+            background-color: #121212;
+            color: #e0e0e0;
             width: 100%;
             padding: 15px 20px;
             text-align: center;
@@ -45,7 +45,7 @@
         }
         body.light-theme header {
             background-color: #e6f0fa;
-            color: #000;
+            color: #333;
         }
         .header-icon {
             font-size: clamp(1.2rem, 4vw, 1.8rem);
@@ -67,8 +67,8 @@
             flex-shrink: 0;
         }
         .icon-btn {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
+            background: linear-gradient(135deg, #0288d1, #0277bd);
+            color: #e0e0e0;
             border: none;
             padding: clamp(5px, 1.2vw, 7px) clamp(10px, 2vw, 12px);
             border-radius: 8px;
@@ -85,15 +85,16 @@
             font-size: clamp(9px, 2vw, 12px);
         }
         body.light-theme .icon-btn {
-            background: linear-gradient(135deg, #0056b3, #003d80);
+            background: linear-gradient(135deg, #42a5f5, #0288d1);
+            color: #333;
         }
         .icon-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.4);
         }
         .theme-btn {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
+            background: linear-gradient(135deg, #0288d1, #0277bd);
+            color: #e0e0e0;
             border: none;
             padding: clamp(5px, 1.2vw, 7px);
             border-radius: 50%;
@@ -105,11 +106,12 @@
             font-size: clamp(9px, 2vw, 12px);
         }
         .theme-btn:hover {
-            background: linear-gradient(135deg, #0056b3, #003d80);
+            background: linear-gradient(135deg, #0277bd, #01579b);
             transform: rotate(360deg);
         }
         body.light-theme .theme-btn {
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            background: linear-gradient(135deg, #ffb300, #ff8f00);
+            color: #333;
         }
         .menu-toggle {
             background: none;
@@ -127,7 +129,7 @@
             right: -100%;
             width: clamp(200px, 80vw, 250px);
             height: 100%;
-            background: #000f1f;
+            background: #121212;
             box-shadow: -2px 0 5px rgba(0,0,0,0.5);
             transition: right 0.3s ease-in-out;
             z-index: 1000;
@@ -149,8 +151,8 @@
             font-size: clamp(10px, 2.5vw, 12px);
         }
         .close-sidebar {
-            background: linear-gradient(135deg, #dc3545, #c82333);
-            color: white;
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            color: #e0e0e0;
             border: none;
             padding: 6px;
             border-radius: 8px;
@@ -163,7 +165,8 @@
             gap: 4px;
         }
         body.light-theme .close-sidebar {
-            background: linear-gradient(135deg, #c82333, #a71d2a);
+            background: linear-gradient(135deg, #ef5350, #d32f2f);
+            color: #333;
         }
         .close-sidebar:hover {
             transform: translateY(-2px);
@@ -173,7 +176,7 @@
             width: 100%;
             max-width: 1200px;
             margin: 15px 10px;
-            background: #001f3f;
+            background: #212121;
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.5);
@@ -204,13 +207,13 @@
             align-items: center;
             min-height: 100vh;
             width: 100%;
-            background: linear-gradient(45deg, #4b0082, #8a2be2, #007bff, #001f3f);
+            background: linear-gradient(45deg, #4b0082, #8a2be2, #0288d1, #212121);
             background-size: 400%;
             animation: gradient 15s ease infinite;
             padding: 10px;
         }
         body.light-theme .landing-page {
-            background: linear-gradient(45deg, #007bff, #0056b3, #e6f0fa, #d9e7f7);
+            background: linear-gradient(45deg, #0288d1, #0277bd, #e6f0fa, #d9e7f7);
         }
         @keyframes gradient {
             0% { background-position: 0% 50%; }
@@ -218,7 +221,7 @@
             100% { background-position: 0% 50%; }
         }
         .landing-content {
-            background: #001f3f;
+            background: #212121;
             padding: clamp(20px, 5vw, 30px);
             border-radius: 12px;
             box-shadow: 0 6px 12px rgba(0,0,0,0.5);
@@ -245,8 +248,8 @@
             margin-bottom: 15px;
         }
         .start-tasks-btn {
-            background: linear-gradient(135deg, #28a745, #1e7e34);
-            color: white;
+            background: linear-gradient(135deg, #388e3c, #2e7d32);
+            color: #e0e0e0;
             border: none;
             padding: clamp(10px, 2.5vw, 12px) clamp(20px, 4vw, 25px);
             border-radius: 8px;
@@ -259,7 +262,8 @@
             margin: 0 auto;
         }
         body.light-theme .start-tasks-btn {
-            background: linear-gradient(135deg, #1e7e34, #155724);
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+            color: #333;
         }
         .start-tasks-btn:hover {
             transform: translateY(-2px);
@@ -289,8 +293,8 @@
             display: none;
         }
         .back-btn {
-            background: linear-gradient(135deg, #dc3545, #c82333);
-            color: white;
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            color: #e0e0e0;
             border: none;
             padding: clamp(5px, 1.2vw, 7px) clamp(10px, 2vw, 12px);
             border-radius: 8px;
@@ -300,13 +304,17 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             font-size: clamp(10px, 2.5vw, 12px);
         }
+        body.light-theme .back-btn {
+            background: linear-gradient(135deg, #ef5350, #d32f2f);
+            color: #333;
+        }
         .back-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.4);
         }
         .clear-cache-btn {
-            background: linear-gradient(135deg, #dc3545, #c82333);
-            color: white;
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            color: #e0e0e0;
             border: none;
             padding: clamp(5px, 1.2vw, 7px) clamp(10px, 2vw, 12px);
             border-radius: 8px;
@@ -319,13 +327,17 @@
             gap: 4px;
             font-size: clamp(10px, 2.5vw, 12px);
         }
+        body.light-theme .clear-cache-btn {
+            background: linear-gradient(135deg, #ef5350, #d32f2f);
+            color: #333;
+        }
         .clear-cache-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.4);
         }
         .reset-btn, .save-settings-btn {
-            background: linear-gradient(135deg, #28a745, #1e7e34);
-            color: white;
+            background: linear-gradient(135deg, #388e3c, #2e7d32);
+            color: #e0e0e0;
             border: none;
             padding: clamp(8px, 2vw, 10px) clamp(15px, 3.5vw, 20px);
             border-radius: 8px;
@@ -339,7 +351,8 @@
             justify-content: center;
         }
         body.light-theme .reset-btn, body.light-theme .save-settings-btn {
-            background: linear-gradient(135deg, #1e7e34, #155724);
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+            color: #333;
         }
         .reset-btn:hover, .save-settings-btn:hover {
             transform: translateY(-2px);
@@ -372,20 +385,20 @@
             font-size: clamp(10px, 2.2vw, 12px);
             border-radius: 5px;
             border: 1px solid #ffd700;
-            background: #002a5c;
-            color: #fff;
+            background: #424242;
+            color: #e0e0e0;
             width: 100%;
             max-width: 280px;
             margin: 0 auto;
         }
         body.light-theme .form-group input, body.light-theme .form-group select {
             background: #e6f0fa;
-            color: #000;
+            color: #333;
             border: 1px solid #007bff;
         }
         .form-group button {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
+            background: linear-gradient(135deg, #0288d1, #0277bd);
+            color: #e0e0e0;
             border: none;
             padding: 6px 14px;
             border-radius: 8px;
@@ -397,12 +410,13 @@
             display: block;
         }
         .form-group button:hover {
-            background: linear-gradient(135deg, #0056b3, #003d80);
+            background: linear-gradient(135deg, #0277bd, #01579b);
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.4);
         }
         body.light-theme .form-group button {
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            background: linear-gradient(135deg, #ffb300, #ff8f00);
+            color: #333;
         }
         .attribute-buttons {
             display: flex;
@@ -414,8 +428,8 @@
             padding: 0 clamp(8px, 1.5vw, 15px);
         }
         .attribute-btn {
-            background: linear-gradient(135deg, #002a5c, #001f3f);
-            color: #fff;
+            background: linear-gradient(135deg, #424242, #212121);
+            color: #e0e0e0;
             border: 2px solid #ffd700;
             padding: clamp(6px, 1.5vw, 8px);
             border-radius: 8px;
@@ -435,25 +449,25 @@
             font-size: clamp(10px, 2.5vw, 14px);
         }
         .attribute-btn.selected {
-            background: linear-gradient(135deg, #28a745, #1e7e34);
-            border-color: #28a745;
+            background: linear-gradient(135deg, #388e3c, #2e7d32);
+            border-color: #388e3c;
             transform: scale(1.05);
         }
         body.light-theme .attribute-btn {
             background: linear-gradient(135deg, #e6f0fa, #d9e7f7);
-            color: #000;
+            color: #333;
             border: 2px solid #007bff;
         }
         body.light-theme .attribute-btn.selected {
-            background: linear-gradient(135deg, #1e7e34, #155724);
-            border-color: #1e7e34;
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+            border-color: #4caf50;
         }
         .attribute-btn:hover {
             transform: scale(1.1);
             box-shadow: 0 3px 6px rgba(0,0,0,0.4);
         }
         .task-card {
-            background: linear-gradient(135deg, #002a5c, #001f3f);
+            background: linear-gradient(135deg, #424242, #212121);
             padding: 8px;
             border-radius: 8px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.4);
@@ -525,7 +539,7 @@
             width: 6px;
         }
         .missions-grid::-webkit-scrollbar-track {
-            background: #001f3f;
+            background: #212121;
         }
         body.light-theme .missions-grid::-webkit-scrollbar-track {
             background: #e6f0fa;
@@ -538,7 +552,7 @@
             background: #007bff;
         }
         .mission-card {
-            background: linear-gradient(135deg, #002a5c, #001f3f);
+            background: linear-gradient(135deg, #424242, #212121);
             padding: 10px;
             border-radius: 8px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.4);
@@ -581,8 +595,8 @@
             color: #007bff;
         }
         .mission-card button {
-            background: linear-gradient(135deg, #28a745, #1e7e34);
-            color: white;
+            background: linear-gradient(135deg, #388e3c, #2e7d32);
+            color: #e0e0e0;
             border: none;
             padding: 6px 12px;
             border-radius: 16px;
@@ -593,13 +607,14 @@
             margin: 4px;
         }
         body.light-theme .mission-card button {
-            background: linear-gradient(135deg, #1e7e34, #155724);
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+            color: #333;
         }
         .mission-card button.cancel-btn {
-            background: linear-gradient(135deg, #dc3545, #c82333);
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
         }
         body.light-theme .mission-card button.cancel-btn {
-            background: linear-gradient(135deg, #c82333, #a71d2a);
+            background: linear-gradient(135deg, #ef5350, #d32f2f);
         }
         .mission-card button:hover {
             transform: translateY(-2px);
@@ -669,12 +684,12 @@
             box-shadow: 0 3px 6px rgba(0,0,0,0.5);
         }
         body.light-theme .xp-bar {
-            background: linear-gradient(135deg, #007bff, #0056b3);
+            background: linear-gradient(135deg, #0288d1, #0277bd);
         }
         .xp-bar progress {
             width: 100%;
             height: 18px;
-            accent-color: #ff00ff;
+            accent-color: #ab47bc;
             background: transparent;
             border-radius: 8px;
         }
@@ -692,8 +707,8 @@
             bottom: 15px;
             left: 50%;
             transform: translateX(-50%);
-            background: #28a745;
-            color: white;
+            background: #388e3c;
+            color: #e0e0e0;
             padding: 8px 15px;
             border-radius: 5px;
             opacity: 0;
@@ -702,6 +717,10 @@
             max-width: 90%;
             text-align: center;
             font-size: clamp(10px, 2.5vw, 12px);
+        }
+        body.light-theme .toast {
+            background: #4caf50;
+            color: #333;
         }
         .toast.show {
             opacity: 1;
@@ -713,7 +732,7 @@
             width: 100%;
         }
         .category-card {
-            background: #002a5c;
+            background: #424242;
             padding: 8px;
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
@@ -734,8 +753,8 @@
             font-size: clamp(10px, 2.2vw, 12px);
         }
         .start-mission-btn {
-            background: linear-gradient(135deg, #28a745, #1e7e34);
-            color: white;
+            background: linear-gradient(135deg, #388e3c, #2e7d32);
+            color: #e0e0e0;
             border: none;
             padding: 8px;
             border-radius: 20px;
@@ -749,7 +768,8 @@
             white-space: nowrap;
         }
         body.light-theme .start-mission-btn {
-            background: linear-gradient(135deg, #1e7e34, #155724);
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+            color: #333;
         }
         .start-mission-btn:hover {
             transform: translateY(-2px);
@@ -782,10 +802,13 @@
             justify-content: center;
         }
         .charts-container canvas {
-            background-color: #ffffff;
+            background-color: #424242;
             max-width: 100%;
             max-height: 180px;
             aspect-ratio: 2 / 1;
+        }
+        body.light-theme .charts-container canvas {
+            background-color: #ffffff;
         }
         @media (max-width: 768px) {
             .charts-container {
@@ -798,7 +821,7 @@
             }
         }
         .category-progress-card, .attribute-progress-card {
-            background: linear-gradient(135deg, #002a5c, #001f3f);
+            background: linear-gradient(135deg, #424242, #212121);
             padding: 12px;
             border-radius: 8px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.4);
@@ -831,7 +854,7 @@
             display: flex;
         }
         .slot-card {
-            background: linear-gradient(135deg, #002a5c, #001f3f);
+            background: linear-gradient(135deg, #424242, #212121);
             padding: 12px;
             border-radius: 8px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.4);
@@ -866,29 +889,32 @@
             gap: 4px;
         }
         .slot-card button.load-btn {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
+            background: linear-gradient(135deg, #0288d1, #0277bd);
+            color: #e0e0e0;
         }
         body.light-theme .slot-card button.load-btn {
-            background: linear-gradient(135deg, #0056b3, #003d80);
+            background: linear-gradient(135deg, #42a5f5, #0288d1);
+            color: #333;
         }
         .slot-card button.delete-btn {
-            background: linear-gradient(135deg, #dc3545, #c82333);
-            color: white;
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            color: #e0e0e0;
         }
         body.light-theme .slot-card button.delete-btn {
-            background: linear-gradient(135deg, #c82333, #a71d2a);
+            background: linear-gradient(135deg, #ef5350, #d32f2f);
+            color: #333;
         }
         .slot-card button:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.4);
         }
         .slot-card .save-btn {
-            background: linear-gradient(135deg, #28a745, #1e7e34);
-            color: white;
+            background: linear-gradient(135deg, #388e3c, #2e7d32);
+            color: #e0e0e0;
         }
         body.light-theme .slot-card .save-btn {
-            background: linear-gradient(135deg, #1e7e34, #155724);
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+            color: #333;
         }
         .action-buttons {
             display: flex;
@@ -898,8 +924,8 @@
             flex-wrap: wrap;
         }
         .action-buttons button {
-            background: linear-gradient(135deg, #28a745, #1e7e34);
-            color: white;
+            background: linear-gradient(135deg, #388e3c, #2e7d32);
+            color: #e0e0e0;
             border: none;
             padding: 8px 15px;
             border-radius: 8px;
@@ -912,7 +938,8 @@
             gap: 4px;
         }
         body.light-theme .action-buttons button {
-            background: linear-gradient(135deg, #1e7e34, #155724);
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+            color: #333;
         }
         .action-buttons button:hover {
             transform: translateY(-2px);
@@ -935,13 +962,13 @@
             border: 1px solid #007bff;
         }
         .history-table th {
-            background: #002a5c;
+            background: #424242;
         }
         body.light-theme .history-table th {
             background: #e6f0fa;
         }
         .history-table tr:nth-child(even) {
-            background: #001f3f;
+            background: #212121;
         }
         body.light-theme .history-table tr:nth-child(even) {
             background: #e6f0fa;
@@ -1062,6 +1089,10 @@
                 <canvas id="tasks-chart-monthly" width="400" height="200"></canvas>
             </div>
             <div>
+                <h3>Tasks Concluídas por Dia (Anual)</h3>
+                <canvas id="tasks-chart-yearly" width="400" height="200"></canvas>
+            </div>
+            <div>
                 <h3>Desempenho por Categoria (Radar)</h3>
                 <canvas id="xp-chart-radar" width="400" height="200"></canvas>
             </div>
@@ -1159,8 +1190,8 @@
         let level = Math.floor(xp / 100) + 1;
         let dailyCount = parseInt(localStorage.getItem('dailyCount')) || 0;
         let streak = parseInt(localStorage.getItem('streak')) || 0;
-        let lastReset = localStorage.getItem('lastReset') || new Date().toDateString();
-        let lastWeeklyReset = localStorage.getItem('lastWeeklyReset') || new Date().toDateString();
+        let lastReset = localStorage.getItem('lastReset') || new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+        let lastWeeklyReset = localStorage.getItem('lastWeeklyReset') || new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
         let xpHistory = JSON.parse(localStorage.getItem('xpHistory')) || Array(7).fill(0);
         let xpByCategory = JSON.parse(localStorage.getItem('xpByCategory')) || {};
         let attributesPoints = JSON.parse(localStorage.getItem('attributesPoints')) || {
@@ -1223,7 +1254,6 @@
         function initAttributeButtons() {
             const buttons = document.querySelectorAll('.attribute-btn');
             buttons.forEach(button => {
-                // Remove any existing listeners to prevent duplicates
                 button.removeEventListener('click', toggleAttribute);
                 button.addEventListener('click', toggleAttribute);
             });
@@ -1282,7 +1312,7 @@
                 }
                 if (id === 'tasks-container') {
                     resetAttributeButtons();
-                    initAttributeButtons(); // Reinitialize buttons when showing tasks section
+                    initAttributeButtons();
                 }
             }
         }
@@ -1319,7 +1349,7 @@
             localStorage.setItem('tasks', JSON.stringify(tasks));
             document.getElementById('task-name').value = '';
             resetAttributeButtons();
-            initAttributeButtons(); // Reinitialize to ensure proper event handling
+            initAttributeButtons();
             updateTasksGrid();
             updateMissions('all');
             showToast('Task adicionada com sucesso!');
@@ -1347,7 +1377,7 @@
                 return;
             }
             task.completed = true;
-            completedTasks.push({ ...task, completedDate: new Date().toLocaleDateString('pt-BR') });
+            completedTasks.push({ ...task, completedDate: new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) });
             localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
             localStorage.setItem('tasks', JSON.stringify(tasks));
             updateMissions('all');
@@ -1543,7 +1573,7 @@
             const task = tasks[index];
             if (task.completed) return;
             const displayType = task.type === 'daily' ? 'Diário' : task.type === 'weekly' ? 'Semanal' : 'Única';
-            completedTasks.push({ ...task, type: displayType, completedDate: new Date().toLocaleDateString('pt-BR') });
+            completedTasks.push({ ...task, type: displayType, completedDate: new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) });
             const basePoints = task.type === 'daily' ? xpDaily : task.type === 'weekly' ? xpWeekly : xpOneTime;
             const multiplier = task.difficulty === 1 ? difficultyMultipliers.easy : task.difficulty === 1.5 ? difficultyMultipliers.medium : task.difficulty === 2 ? difficultyMultipliers.hard : 1;
             let points = basePoints * multiplier * (1 + streak * 0.05);
@@ -1554,7 +1584,7 @@
             (task.attributes || []).forEach(attr => {
                 attributesPoints[attr] = (attributesPoints[attr] || 0) + pointsPerAttribute;
             });
-            const dayIndex = new Date().getDay();
+            const dayIndex = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }).getDay();
             xpHistory[dayIndex] += points;
             localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
             localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
@@ -1661,49 +1691,70 @@
                 tasks,
                 completedTasks,
                 categories,
-                date: new Date().toLocaleString()
+                date: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
             };
             localStorage.setItem('savedProgress', JSON.stringify(savedProgress));
             updateSaveSlots();
-            showToast('Progresso salvo no slot ' + (index + 1));
+            showToast(`Progresso salvo no slot ${index + 1}!`);
         }
 
-        function loadProgress(index) {
+        function loadFromSlot(index) {
             if (!savedProgress[index]) {
-                showToast('Slot vazio!');
+                showToast('Nenhum progresso salvo neste slot.');
                 return;
             }
-            const slot = savedProgress[index];
-            xp = slot.xp;
-            level = slot.level;
-            streak = slot.streak;
-            dailyCount = slot.dailyCount;
-            xpHistory = slot.xpHistory;
-            xpByCategory = slot.xpByCategory;
-            attributesPoints = slot.attributesPoints;
-            tasks = slot.tasks;
-            completedTasks = slot.completedTasks;
-            categories = slot.categories || categories;
+            if (!window.confirm(`Deseja carregar o progresso do slot ${index + 1}? Isso substituirá o progresso atual.`)) {
+                return;
+            }
+            const progress = savedProgress[index];
+            xp = progress.xp || 0;
+            level = progress.level || 1;
+            streak = progress.streak || 0;
+            dailyCount = progress.dailyCount || 0;
+            xpHistory = progress.xpHistory || Array(7).fill(0);
+            xpByCategory = progress.xpByCategory || {};
+            attributesPoints = progress.attributesPoints || {
+                Força: 0,
+                Inteligência: 0,
+                Vitalidade: 0,
+                Sabedoria: 0,
+                Destreza: 0,
+                Humor: 0
+            };
+            tasks = progress.tasks || [];
+            completedTasks = progress.completedTasks || [];
+            categories = progress.categories || ['Saúde', 'Trabalho', 'Aprendizado', 'Lazer'];
             localStorage.setItem('xp', xp);
-            localStorage.setItem('dailyCount', dailyCount);
+            localStorage.setItem('level', level);
             localStorage.setItem('streak', streak);
+            localStorage.setItem('dailyCount', dailyCount);
             localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
             localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
             localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
             localStorage.setItem('tasks', JSON.stringify(tasks));
             localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
-                        localStorage.setItem('categories', JSON.stringify(categories));
-            updateCategoryCards();
+            localStorage.setItem('categories', JSON.stringify(categories));
             updateCategorySelect();
+            updateCategoryCards();
             updateTasksGrid();
             updateMissions('all');
             updateScore();
             updateHistory();
-            updateCategoryProgress();
-            updateAttributeProgress();
+            showToast(`Progresso carregado do slot ${index + 1}!`);
+        }
+
+        function deleteSlot(index) {
+            if (!savedProgress[index]) {
+                showToast('Nenhum progresso salvo neste slot para excluir.');
+                return;
+            }
+            if (!window.confirm(`Deseja excluir o progresso do slot ${index + 1}?`)) {
+                return;
+            }
+            savedProgress[index] = null;
+            localStorage.setItem('savedProgress', JSON.stringify(savedProgress));
             updateSaveSlots();
-            showToast('Progresso carregado do slot ' + (index + 1));
-            toggleSaveSlots();
+            showToast(`Slot ${index + 1} excluído com sucesso!`);
         }
 
         function updateSaveSlots() {
@@ -1714,49 +1765,15 @@
                 card.className = 'slot-card';
                 card.innerHTML = `
                     <h3>Slot ${index + 1}</h3>
-                    <p>${slot ? `Salvo em: ${slot.date}<br>XP: ${slot.xp} | Nível: ${slot.level}` : 'Vazio'}</p>
-                    <div>
-                        ${slot ? `<button class="load-btn" onclick="loadProgress(${index})"><i class="fas fa-play"></i> Carregar</button>` : ''}
+                    <p>${slot ? `Salvo em: ${slot.date}` : 'Vazio'}</p>
+                    ${slot ? `
+                        <button class="load-btn" onclick="loadFromSlot(${index})"><i class="fas fa-play"></i> Carregar</button>
+                        <button class="delete-btn" onclick="deleteSlot(${index})"><i class="fas fa-trash"></i> Excluir</button>
+                    ` : `
                         <button class="save-btn" onclick="saveToSlot(${index})"><i class="fas fa-save"></i> Salvar</button>
-                        ${slot ? `<button class="delete-btn" onclick="deleteSlot(${index})"><i class="fas fa-trash"></i> Excluir</button>` : ''}
-                    </div>
+                    `}
                 `;
                 slots.appendChild(card);
-            });
-        }
-
-        function deleteSlot(index) {
-            if (!window.confirm('Deseja excluir este slot de progresso?')) return;
-            savedProgress[index] = null;
-            localStorage.setItem('savedProgress', JSON.stringify(savedProgress));
-            updateSaveSlots();
-            showToast('Slot ' + (index + 1) + ' excluído com sucesso!');
-        }
-
-        function updateHistory() {
-            const tbody = document.getElementById('history-table-body');
-            tbody.innerHTML = '';
-            completedTasks.forEach(task => {
-                const attributeIcons = {
-                    Força: 'fas fa-dumbbell',
-                    Inteligência: 'fas fa-brain',
-                    Vitalidade: 'fas fa-heart',
-                    Sabedoria: 'fas fa-book',
-                    Destreza: 'fas fa-running',
-                    Humor: 'fas fa-smile'
-                };
-                const attributesHtml = (task.attributes || []).map(attr => `<i class="${attributeIcons[attr]}" title="${attr}"></i>`).join('');
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${task.name}</td>
-                    <td>${task.category}</td>
-                    <td>${task.type}</td>
-                    <td>${task.difficulty === 1 ? 'Fácil' : task.difficulty === 1.5 ? 'Médio' : 'Difícil'}</td>
-                    <td>${task.progress}%</td>
-                    <td>${attributesHtml}</td>
-                    <td>${task.completedDate}</td>
-                `;
-                tbody.appendChild(row);
             });
         }
 
@@ -1783,75 +1800,85 @@
             if (!window.confirm('Deseja resetar todo o progresso? Isso não pode ser desfeito.')) return;
             xp = 0;
             level = 1;
-            dailyCount = 0;
             streak = 0;
-            tasks = [];
-            completedTasks = [];
+            dailyCount = 0;
             xpHistory = Array(7).fill(0);
             xpByCategory = {};
             attributesPoints = { Força: 0, Inteligência: 0, Vitalidade: 0, Sabedoria: 0, Destreza: 0, Humor: 0 };
-            categories.forEach(cat => xpByCategory[cat] = 0);
-            localStorage.setItem('xp', xp);
-            localStorage.setItem('dailyCount', dailyCount);
-            localStorage.setItem('streak', streak);
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
-            localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
-            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
-            localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
-            updateTasksGrid();
-            updateMissions('all');
-            updateScore();
-            updateHistory();
-            updateCategoryProgress();
-            updateAttributeProgress();
-            showToast('Progresso resetado!');
-        }
-
-        function clearCache() {
-            if (!window.confirm('Deseja apagar todo o cache? Isso resetará todas as configurações e progresso.')) return;
-            localStorage.clear();
+            tasks = [];
+            completedTasks = [];
             savedProgress = Array(5).fill(null);
-            localStorage.setItem('savedProgress', JSON.stringify(savedProgress));
-            xp = 0;
-            level = 1;
-            dailyCount = 0;
-            streak = 0;
-            tasks = [];
-            completedTasks = [];
             categories = ['Saúde', 'Trabalho', 'Aprendizado', 'Lazer'];
-            xpHistory = Array(7).fill(0);
-            xpByCategory = {};
-            attributesPoints = { Força: 0, Inteligência: 0, Vitalidade: 0, Sabedoria: 0, Destreza: 0, Humor: 0 };
-            categories.forEach(cat => xpByCategory[cat] = 0);
+            localStorage.clear();
             localStorage.setItem('categories', JSON.stringify(categories));
+            categories.forEach(cat => xpByCategory[cat] = 0);
             localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
-            localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
-            updateCategoryCards();
             updateCategorySelect();
+            updateCategoryCards();
             updateTasksGrid();
             updateMissions('all');
             updateScore();
             updateHistory();
             updateSaveSlots();
-            showToast('Cache apagado com sucesso!');
+            showToast('Progresso resetado com sucesso!');
+        }
+
+        function clearCache() {
+            if (!window.confirm('Deseja apagar o cache? Isso não afetará o progresso salvo.')) return;
+            localStorage.clear();
+            showToast('Cache apagado com sucesso! A página será recarregada.');
+            setTimeout(() => location.reload(), 1000);
+        }
+
+        function updateHistory() {
+            const tbody = document.getElementById('history-table-body');
+            tbody.innerHTML = '';
+            completedTasks.forEach(task => {
+                const attributesHtml = (task.attributes || []).map(attr => {
+                    const attributeIcons = {
+                        Força: 'fas fa-dumbbell',
+                        Inteligência: 'fas fa-brain',
+                        Vitalidade: 'fas fa-heart',
+                        Sabedoria: 'fas fa-book',
+                        Destreza: 'fas fa-running',
+                        Humor: 'fas fa-smile'
+                    };
+                    return `<i class="${attributeIcons[attr]}" title="${attr}"></i>`;
+                }).join('');
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${task.name}</td>
+                    <td>${task.category}</td>
+                    <td>${task.type}</td>
+                    <td>${task.difficulty === 1 ? 'Fácil' : task.difficulty === 1.5 ? 'Médio' : 'Difícil'}</td>
+                    <td>${task.progress}%</td>
+                    <td>${attributesHtml}</td>
+                    <td>${task.completedDate}</td>
+                `;
+                tbody.appendChild(row);
+            });
         }
 
         function checkReset() {
-            const today = new Date().toDateString();
-            if (lastReset !== today) {
+            const today = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+            const todayDate = new Date();
+            const lastResetDate = new Date(lastReset.split('/').reverse().join('-'));
+            const lastWeeklyResetDate = new Date(lastWeeklyReset.split('/').reverse().join('-'));
+            const oneDay = 24 * 60 * 60 * 1000;
+            const oneWeek = 7 * oneDay;
+
+            if ((todayDate - lastResetDate) >= oneDay) {
                 tasks = tasks.map(task => {
                     if (task.type === 'daily') {
-                        return { ...task, completed: false, progress: 100 };
+                        return { ...task, completed: false };
                     }
                     return task;
                 });
                 dailyCount = 0;
-                const yesterday = new Date();
-                yesterday.setDate(yesterday.getDate() - 1);
-                if (lastReset === yesterday.toDateString() && dailyCount >= dailyGoal) {
+                const yesterday = new Date(todayDate - oneDay).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+                if (lastReset === yesterday && dailyCount >= dailyGoal) {
                     streak++;
-                } else if (lastReset !== yesterday.toDateString()) {
+                } else if (lastReset !== today) {
                     streak = 0;
                 }
                 lastReset = today;
@@ -1860,15 +1887,9 @@
                 localStorage.setItem('streak', streak);
                 localStorage.setItem('lastReset', lastReset);
             }
-            const currentWeek = getWeekNumber(new Date());
-            const lastWeek = lastWeeklyReset ? getWeekNumber(new Date(lastWeeklyReset)) : currentWeek;
-            if (currentWeek !== lastWeek) {
-                tasks = tasks.map(task => {
-                    if (task.type === 'weekly') {
-                        return { ...task, completed: false, progress: 100 };
-                    }
-                    return task;
-                });
+
+            if ((todayDate - lastWeeklyResetDate) >= oneWeek) {
+                tasks = tasks.filter(task => task.type !== 'weekly');
                 xpHistory = Array(7).fill(0);
                 lastWeeklyReset = today;
                 localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -1877,43 +1898,33 @@
             }
             updateScore();
             updateMissions('all');
-        }
-
-        function getWeekNumber(date) {
-            const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-            const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
-            return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+            updateTasksGrid();
         }
 
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
 
         function updateCharts() {
             const isLightTheme = document.body.classList.contains('light-theme');
-            const labelColor = isLightTheme ? '#000000' : '#ffffff';
-            const gridColor = isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
-            const colors = {
-                bar: isLightTheme ? ['#007bff', '#0056b3', '#003d80', '#28a745', '#1e7e34', '#155724', '#ff8c00'] : ['#ffd700', '#ff8c00', '#ff4500', '#28a745', '#1e7e34', '#155724', '#007bff'],
-                radar: isLightTheme ? 'rgba(0, 123, 255, 0.5)' : 'rgba(255, 215, 0, 0.5)',
-                radarBorder: isLightTheme ? '#007bff' : '#ffd700'
-            };
+            const barColor = isLightTheme ? '#007bff' : '#ffd700';
+            const radarColor = isLightTheme ? 'rgba(0, 123, 255, 0.5)' : 'rgba(255, 215, 0, 0.5)';
+            const radarBorder = isLightTheme ? '#0056b3' : '#ff8c00';
 
-            // Bar chart for weekly XP
-            const xpChartBar = document.getElementById('xp-chart-bar').getContext('2d');
-            if (window.xpChartBarInstance) window.xpChartBarInstance.destroy();
-            window.xpChartBarInstance = new Chart(xpChartBar, {
+            const xpChartBar = new Chart(document.getElementById('xp-chart-bar'), {
                 type: 'bar',
                 data: {
                     labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
                     datasets: [{
-                        label: 'XP por Dia',
+                        label: 'XP Ganho',
                         data: xpHistory,
-                        backgroundColor: colors.bar,
-                        borderColor: colors.bar,
+                        backgroundColor: barColor,
+                        borderColor: barColor,
                         borderWidth: 1
                     }]
                 },
@@ -1921,43 +1932,30 @@
                     responsive: true,
                     maintainAspectRatio: true,
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: { display: true, text: 'XP', color: labelColor },
-                            ticks: { color: labelColor },
-                            grid: { color: gridColor }
-                        },
-                        x: {
-                            ticks: { color: labelColor },
-                            grid: { color: gridColor }
-                        }
-                    },
-                    plugins: {
-                        legend: { labels: { color: labelColor } }
+                        y: { beginAtZero: true }
                     }
                 }
             });
 
-            // Line chart for monthly tasks completed
-            const tasksChartMonthly = document.getElementById('tasks-chart-monthly').getContext('2d');
-            const daysInMonth = Array.from({ length: 30 }, (_, i) => (i + 1).toString());
-            const taskCounts = daysInMonth.map(day => {
-                return completedTasks.filter(task => {
-                    const date = new Date(task.completedDate.split('/').reverse().join('-'));
-                    return date.getDate() === parseInt(day) && date.getMonth() === new Date().getMonth();
-                }).length;
+            const tasksMonthly = Array(30).fill(0);
+            const tasksYearly = Array(12).fill(0);
+            completedTasks.forEach(task => {
+                const date = new Date(task.completedDate.split('/').reverse().join('-'));
+                const dayIndex = Math.floor((new Date() - date) / (24 * 60 * 60 * 1000));
+                const monthIndex = date.getMonth();
+                if (dayIndex < 30) tasksMonthly[dayIndex]++;
+                tasksYearly[monthIndex]++;
             });
-            if (window.tasksChartMonthlyInstance) window.tasksChartMonthlyInstance.destroy();
-            window.tasksChartMonthlyInstance = new Chart(tasksChartMonthly, {
+
+            const tasksChartMonthly = new Chart(document.getElementById('tasks-chart-monthly'), {
                 type: 'line',
                 data: {
-                    labels: daysInMonth,
+                    labels: Array.from({ length: 30 }, (_, i) => `Dia ${30 - i}`),
                     datasets: [{
                         label: 'Tasks Concluídas',
-                        data: taskCounts,
-                        backgroundColor: colors.radar,
-                        borderColor: colors.radarBorder,
-                        borderWidth: 2,
+                        data: tasksMonthly.reverse(),
+                        borderColor: barColor,
+                        backgroundColor: radarColor,
                         fill: true
                     }]
                 },
@@ -1965,35 +1963,41 @@
                     responsive: true,
                     maintainAspectRatio: true,
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: { display: true, text: 'Tasks', color: labelColor },
-                            ticks: { color: labelColor },
-                            grid: { color: gridColor }
-                        },
-                        x: {
-                            ticks: { color: labelColor },
-                            grid: { color: gridColor }
-                        }
-                    },
-                    plugins: {
-                        legend: { labels: { color: labelColor } }
+                        y: { beginAtZero: true }
                     }
                 }
             });
 
-            // Radar chart for category XP
-            const xpChartRadar = document.getElementById('xp-chart-radar').getContext('2d');
-            if (window.xpChartRadarInstance) window.xpChartRadarInstance.destroy();
-            window.xpChartRadarInstance = new Chart(xpChartRadar, {
+            const tasksChartYearly = new Chart(document.getElementById('tasks-chart-yearly'), {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                    datasets: [{
+                        label: 'Tasks Concluídas',
+                        data: tasksYearly,
+                        backgroundColor: barColor,
+                        borderColor: barColor,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            const xpChartRadar = new Chart(document.getElementById('xp-chart-radar'), {
                 type: 'radar',
                 data: {
                     labels: categories,
                     datasets: [{
                         label: 'XP por Categoria',
                         data: categories.map(cat => xpByCategory[cat] || 0),
-                        backgroundColor: colors.radar,
-                        borderColor: colors.radarBorder,
+                        backgroundColor: radarColor,
+                        borderColor: radarBorder,
                         borderWidth: 2
                     }]
                 },
@@ -2001,31 +2005,20 @@
                     responsive: true,
                     maintainAspectRatio: true,
                     scales: {
-                        r: {
-                            beginAtZero: true,
-                            ticks: { color: labelColor },
-                            grid: { color: gridColor },
-                            pointLabels: { color: labelColor }
-                        }
-                    },
-                    plugins: {
-                        legend: { labels: { color: labelColor } }
+                        r: { beginAtZero: true }
                     }
                 }
             });
 
-            // Radar chart for attribute points
-            const attributeChartRadar = document.getElementById('attribute-chart-radar').getContext('2d');
-            if (window.attributeChartRadarInstance) window.attributeChartRadarInstance.destroy();
-            window.attributeChartRadarInstance = new Chart(attributeChartRadar, {
+            const attributeChartRadar = new Chart(document.getElementById('attribute-chart-radar'), {
                 type: 'radar',
                 data: {
                     labels: ['Força', 'Inteligência', 'Vitalidade', 'Sabedoria', 'Destreza', 'Humor'],
                     datasets: [{
                         label: 'Pontos por Atributo',
                         data: Object.values(attributesPoints),
-                        backgroundColor: colors.radar,
-                        borderColor: colors.radarBorder,
+                        backgroundColor: radarColor,
+                        borderColor: radarBorder,
                         borderWidth: 2
                     }]
                 },
@@ -2033,22 +2026,13 @@
                     responsive: true,
                     maintainAspectRatio: true,
                     scales: {
-                        r: {
-                            beginAtZero: true,
-                            ticks: { color: labelColor },
-                            grid: { color: gridColor },
-                            pointLabels: { color: labelColor }
-                        }
-                    },
-                    plugins: {
-                        legend: { labels: { color: labelColor } }
+                        r: { beginAtZero: true }
                     }
                 }
             });
         }
 
-        // Initialize the application
-        init();
+        window.onload = init;
     </script>
 </body>
 </html>
