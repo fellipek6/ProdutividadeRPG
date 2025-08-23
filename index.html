@@ -1172,11 +1172,20 @@
             const isLightTheme = document.body.classList.contains('light-theme');
             const backgroundColor = isLightTheme ? 'rgba(66, 165, 245, 0.5)' : 'rgba(171, 71, 188, 0.5)';
             const borderColor = isLightTheme ? '#007bff' : '#ab47bc';
+            const fontColor = isLightTheme ? '#333' : '#ffffff';
             if (charts.xpChartBar) charts.xpChartBar.destroy();
             charts.xpChartBar = new Chart(document.getElementById('xp-chart-bar'), {
                 type: 'bar',
                 data: { labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'], datasets: [{ label: 'XP Semanal', data: xpHistory, backgroundColor, borderColor, borderWidth: 1 }] },
-                options: { scales: { y: { beginAtZero: true } } }
+                options: {scales: { y: {beginAtZero: true,
+                ticks: { color: fontColor }},
+                x: {ticks: { color: fontColor }}},
+            plugins: {
+                legend: {
+                    labels: { color: fontColor } // Cor da fonte da legenda
+                }
+            }
+        }
             });
             const monthlyTasks = Array(30).fill(0);
             const yearlyTasks = Array(12).fill(0);
@@ -1201,7 +1210,22 @@
             charts.tasksChartMonthly = new Chart(document.getElementById('tasks-chart-monthly'), {
                 type: 'line',
                 data: { labels: Array.from({ length: 30 }, (_, i) => `${29 - i} dias atrás`), datasets: [{ label: 'Tasks Concluídas (Mensal)', data: monthlyTasks, backgroundColor, borderColor, fill: false, tension: 0.1 }] },
-                options: { scales: { y: { beginAtZero: true } } }
+                options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: fontColor } // Cor da fonte dos ticks do eixo Y
+                },
+                x: {
+                    ticks: { color: fontColor } // Cor da fonte dos ticks do eixo X
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: { color: fontColor } // Cor da fonte da legenda
+                }
+            }
+        }
             });
             if (charts.tasksChartYearly) charts.tasksChartYearly.destroy();
             charts.tasksChartYearly = new Chart(document.getElementById('tasks-chart-yearly'), {
@@ -1216,7 +1240,22 @@
                         borderWidth: 1
                     }]
                 },
-                options: { scales: { y: { beginAtZero: true } } }
+                options: {
+                  scales: {
+                      y: {
+                          beginAtZero: true,
+                          ticks: { color: fontColor } // Cor da fonte dos ticks do eixo Y
+                      },
+                      x: {
+                          ticks: { color: fontColor } // Cor da fonte dos ticks do eixo X
+                      }
+                  },
+                  plugins: {
+                      legend: {
+                          labels: { color: fontColor } // Cor da fonte da legenda
+                      }
+                  }
+              }
             });
             if (charts.xpChartRadar) charts.xpChartRadar.destroy();
             charts.xpChartRadar = new Chart(document.getElementById('xp-chart-radar'), {
@@ -1226,12 +1265,27 @@
                     datasets: [{ 
                         label: 'XP por Categoria', 
                         data: categories.map(cat => Math.floor(xpByCategory[cat] || 0)), 
-                        backgroundColor: backgroundColor.replace('0.5', '0.2'), 
+                        backgroundColor: 'transparent', 
                         borderColor, 
                         borderWidth: 1 
                     }]
                 },
-                options: { scales: { r: { beginAtZero: true } } }
+                options: {
+                  scales: {
+                      r: {
+                          beginAtZero: true,
+                          ticks: { color: fontColor, backdropColor: 'transparent' }, // Cor da fonte dos ticks e fundo transparente
+                          pointLabels: { color: fontColor }, // Cor das labels dos pontos (categorias)
+                          grid: { color: isLightTheme ? '#ccc' : '#555' }, // Cor da grade
+                          angleLines: { color: isLightTheme ? '#ccc' : '#555' } // Cor das linhas angulares
+                      }
+                  },
+                  plugins: {
+                      legend: {
+                          labels: { color: fontColor } // Cor da fonte da legenda
+                      }
+                  }
+              }
             });
             if (charts.attributeChartRadar) charts.attributeChartRadar.destroy();
             charts.attributeChartRadar = new Chart(document.getElementById('attribute-chart-radar'), {
@@ -1241,12 +1295,27 @@
                     datasets: [{ 
                         label: 'XP por Atributo', 
                         data: Object.values(attributesPoints).map(x => Math.floor(x)), 
-                        backgroundColor: backgroundColor.replace('0.5', '0.2'), 
+                        backgroundColor: 'transparent', 
                         borderColor, 
                         borderWidth: 1 
                     }]
                 },
-                options: { scales: { r: { beginAtZero: true } } }
+                options: {
+                  scales: {
+                      r: {
+                          beginAtZero: true,
+                          ticks: { color: fontColor, backdropColor: 'transparent' }, // Cor da fonte dos ticks e fundo transparente
+                          pointLabels: { color: fontColor }, // Cor das labels dos pontos (atributos)
+                          grid: { color: isLightTheme ? '#ccc' : '#555' }, // Cor da grade
+                          angleLines: { color: isLightTheme ? '#ccc' : '#555' } // Cor das linhas angulares
+                      }
+                  },
+                  plugins: {
+                      legend: {
+                          labels: { color: fontColor } // Cor da fonte da legenda
+                      }
+                  }
+              }
             });
         }
 
