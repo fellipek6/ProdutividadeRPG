@@ -959,7 +959,7 @@
             completedTasks.push({ ...task, type: displayType, completedDate: new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) });
             xp += points;
             xpByCategory[task.category] = (xpByCategory[task.category] || 0) + points;
-            const pointsPerAttribute = task.attributes.length > 0 ? points / task.attributes.length : 0;
+            const pointsPerAttribute = task.attributes.length > 0 ? Math.floor(points / task.attributes.length) : 0;
             task.attributes.forEach(attr => { attributesPoints[attr] = (attributesPoints[attr] || 0) + pointsPerAttribute; });
             const today = new Date();
             const dayIndex = today.getDay();
@@ -992,16 +992,16 @@
         }
 
         function updateScore() {
-            document.getElementById('xp').textContent = xp;
+            document.getElementById('xp').textContent = Math.floor(xp);
             document.getElementById('level').textContent = level;
             document.getElementById('streak').textContent = streak;
             document.getElementById('daily-progress').max = dailyGoal;
             document.getElementById('daily-progress').value = dailyCount;
             document.getElementById('weekly-progress').max = weeklyGoal;
-            document.getElementById('weekly-progress').value = xp % weeklyGoal;
+            document.getElementById('weekly-progress').value = Math.floor(xp % weeklyGoal);
             document.getElementById('daily-goal-label').textContent = dailyGoal;
             document.getElementById('weekly-goal-label').textContent = weeklyGoal;
-            document.getElementById('global-xp').value = xp % 100;
+            document.getElementById('global-xp').value = Math.floor(xp % 100);
             document.getElementById('xp-label').textContent = `XP: ${xp % 100} / 100 (Nível ${level})`;
             updateCategoryProgress();
             updateAttributeProgress();
@@ -1014,9 +1014,9 @@
             categories.forEach(cat => { if (!xpByCategory[cat]) xpByCategory[cat] = 0; });
             localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
             categories.forEach(cat => {
-                const xp = xpByCategory[cat] || 0;
+                const xp = Math.floor(xpByCategory[cat] || 0);
                 const level = Math.floor(xp / 100) + 1;
-                const progress = xp % 100;
+                const progress = Math.floor(xp % 100);
                 const card = document.createElement('div');
                 card.className = 'category-progress-card';
                 card.innerHTML = `<h4>${cat}</h4><p>Nível: ${level}</p><p>XP: ${xp} (${progress}/100)</p><progress value="${progress}" max="100"></progress>`;
@@ -1029,9 +1029,9 @@
             grid.innerHTML = '';
             const attributeIcons = { Força: 'fas fa-dumbbell', Inteligência: 'fas fa-brain', Vitalidade: 'fas fa-heart', Sabedoria: 'fas fa-book', Destreza: 'fas fa-running', Humor: 'fas fa-smile' };
             Object.keys(attributesPoints).forEach(attr => {
-                const xp = attributesPoints[attr] || 0;
+                const xp = Math.floor(attributesPoints[attr] || 0);
                 const level = Math.floor(xp / 100) + 1;
-                const progress = xp % 100;
+                const progress = Math.floor(xp % 100);
                 const card = document.createElement('div');
                 card.className = 'attribute-progress-card';
                 card.innerHTML = `<h4><i class="${attributeIcons[attr]}"></i> ${attr}</h4><p>Nível: ${level}</p><p>XP: ${xp} (${progress}/100)</p><progress value="${progress}" max="100"></progress>`;
@@ -1225,7 +1225,7 @@
                     labels: categories, 
                     datasets: [{ 
                         label: 'XP por Categoria', 
-                        data: categories.map(cat => xpByCategory[cat] || 0), 
+                        data: categories.map(cat => Math.floor(xpByCategory[cat] || 0)), 
                         backgroundColor: backgroundColor.replace('0.5', '0.2'), 
                         borderColor, 
                         borderWidth: 1 
@@ -1240,7 +1240,7 @@
                     labels: Object.keys(attributesPoints), 
                     datasets: [{ 
                         label: 'XP por Atributo', 
-                        data: Object.values(attributesPoints), 
+                        data: Object.values(attributesPoints).map(x => Math.floor(x)), 
                         backgroundColor: backgroundColor.replace('0.5', '0.2'), 
                         borderColor, 
                         borderWidth: 1 
