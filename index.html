@@ -803,9 +803,11 @@
         }
         .charts-container canvas {
             background-color: #424242;
-            max-width: 100%;
-            max-height: 180px;
-            aspect-ratio: 2 / 1;
+            max-width: 400px;
+            max-height: 300px;
+            width: 100%;
+            height: 300px;
+            aspect-ratio: 4 / 3;
         }
         body.light-theme .charts-container canvas {
             background-color: #ffffff;
@@ -896,6 +898,7 @@
             background: linear-gradient(135deg, #42a5f5, #0288d1);
             color: #333;
         }
+        .slot-card/Toggle navigation
         .slot-card button.delete-btn {
             background: linear-gradient(135deg, #d32f2f, #b71c1c);
             color: #e0e0e0;
@@ -1035,11 +1038,11 @@
                     <option value="Semanal">Semanal</option>
                     <option value="Única">Única</option>
                 </select>
-                <label for="task-difficulty">Dificuldade:</label>
+                <label for="task-difficulty">Pontuação:</label>
                 <select id="task-difficulty">
-                    <option value="1">Fácil</option>
-                    <option value="1.5">Médio</option>
-                    <option value="2">Difícil</option>
+                    <option value="1">Baixa</option>
+                    <option value="1.5">Média</option>
+                    <option value="2">Alta</option>
                 </select>
                 <label>Atributos:</label>
                 <div class="attribute-buttons" id="attribute-buttons">
@@ -1082,23 +1085,23 @@
         <div class="charts-container">
             <div>
                 <h3>Gráfico de XP Semanal (Barra)</h3>
-                <canvas id="xp-chart-bar" width="400" height="200"></canvas>
+                <canvas id="xp-chart-bar"></canvas>
             </div>
             <div>
                 <h3>Tasks Concluídas por Dia (Mensal)</h3>
-                <canvas id="tasks-chart-monthly" width="400" height="200"></canvas>
+                <canvas id="tasks-chart-monthly"></canvas>
             </div>
             <div>
                 <h3>Tasks Concluídas por Dia (Anual)</h3>
-                <canvas id="tasks-chart-yearly" width="400" height="200"></canvas>
+                <canvas id="tasks-chart-yearly"></canvas>
             </div>
             <div>
                 <h3>Desempenho por Categoria (Radar)</h3>
-                <canvas id="xp-chart-radar" width="400" height="200"></canvas>
+                <canvas id="xp-chart-radar"></canvas>
             </div>
             <div>
                 <h3>Desempenho por Atributo (Radar)</h3>
-                <canvas id="attribute-chart-radar" width="400" height="200"></canvas>
+                <canvas id="attribute-chart-radar"></canvas>
             </div>
         </div>
         <div style="grid-column: span 2; display: flex; align-items: center; justify-content: center;">
@@ -1115,7 +1118,7 @@
                     <th>Nome</th>
                     <th>Categoria</th>
                     <th>Tipo</th>
-                    <th>Dificuldade</th>
+                    <th>Pontuação</th>
                     <th>Progresso (%)</th>
                     <th>Atributos</th>
                     <th>Data de Conclusão</th>
@@ -1151,15 +1154,15 @@
                 <input type="number" id="xp-one-time" value="20">
             </div>
             <div class="form-group">
-                <label for="difficulty-easy">Multiplicador Fácil:</label>
+                <label for="difficulty-easy">Multiplicador Baixa Pontuação:</label>
                 <input type="number" id="difficulty-easy" step="0.1" value="1">
             </div>
             <div class="form-group">
-                <label for="difficulty-medium">Multiplicador Médio:</label>
+                <label for="difficulty-medium">Multiplicador Média Pontuação:</label>
                 <input type="number" id="difficulty-medium" step="0.1" value="1.5">
             </div>
             <div class="form-group">
-                <label for="difficulty-hard">Multiplicador Difícil:</label>
+                <label for="difficulty-hard">Multiplicador Alta Pontuação:</label>
                 <input type="number" id="difficulty-hard" step="0.1" value="2">
             </div>
             <div class="form-group">
@@ -1531,8 +1534,7 @@
                 Destreza: 'fas fa-running',
                 Humor: 'fas fa-smile'
             };
-            filteredTasks.forEach(task => {
-                const index = tasks.findIndex(t => t === task);
+            filteredTasks.forEach((task, index) => {
                 const displayType = task.type === 'daily' ? 'Diário' : task.type === 'weekly' ? 'Semanal' : 'Única';
                 const attributesHtml = (task.attributes || []).map(attr => `<i class="${attributeIcons[attr]}" title="${attr}"></i>`).join('');
                 const card = document.createElement('div');
@@ -1571,7 +1573,10 @@
 
         function toggleTask(index) {
             const task = tasks[index];
-            if (task.completed) return;
+            if (task.completed) {
+                showToast('Esta task já está concluída.');
+                return;
+            }
             const displayType = task.type === 'daily' ? 'Diário' : task.type === 'weekly' ? 'Semanal' : 'Única';
             completedTasks.push({ ...task, type: displayType, completedDate: new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) });
             const basePoints = task.type === 'daily' ? xpDaily : task.type === 'weekly' ? xpWeekly : xpOneTime;
@@ -1584,8 +1589,9 @@
             (task.attributes || []).forEach(attr => {
                 attributesPoints[attr] = (attributesPoints[attr] || 0) + pointsPerAttribute;
             });
-            const dayIndex = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }).getDay();
-            xpHistory[dayIndex] += points;
+            const today = new Date();
+            const dayIndex = today.getDay();
+            xpHistory[dayIndex] = (xpHistory[dayIndex] || 0) + points;
             localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
             localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
             localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
@@ -1597,6 +1603,7 @@
                 tasks.splice(index, 1);
             } else {
                 task.completed = true;
+                task.progress = 100; // Reset progress to 100% on completion
             }
             if (Math.floor(xp / 100) + 1 > level) {
                 level = Math.floor(xp / 100) + 1;
@@ -1700,12 +1707,10 @@
 
         function loadFromSlot(index) {
             if (!savedProgress[index]) {
-                showToast('Nenhum progresso salvo neste slot.');
+                showToast('Este slot está vazio.');
                 return;
             }
-            if (!window.confirm(`Deseja carregar o progresso do slot ${index + 1}? Isso substituirá o progresso atual.`)) {
-                return;
-            }
+            if (!window.confirm(`Deseja carregar o progresso do slot ${index + 1}? O progresso atual será substituído.`)) return;
             const progress = savedProgress[index];
             xp = progress.xp || 0;
             level = progress.level || 1;
@@ -1745,16 +1750,14 @@
 
         function deleteSlot(index) {
             if (!savedProgress[index]) {
-                showToast('Nenhum progresso salvo neste slot para excluir.');
+                showToast('Este slot está vazio.');
                 return;
             }
-            if (!window.confirm(`Deseja excluir o progresso do slot ${index + 1}?`)) {
-                return;
-            }
+            if (!window.confirm(`Deseja excluir o progresso do slot ${index + 1}?`)) return;
             savedProgress[index] = null;
             localStorage.setItem('savedProgress', JSON.stringify(savedProgress));
             updateSaveSlots();
-            showToast(`Slot ${index + 1} excluído com sucesso!`);
+            showToast(`Slot ${index + 1} excluído!`);
         }
 
         function updateSaveSlots() {
@@ -1774,6 +1777,70 @@
                     `}
                 `;
                 slots.appendChild(card);
+            });
+        }
+
+        function checkReset() {
+            const today = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+            const todayDate = new Date();
+            const lastResetDate = new Date(lastReset.split('/').reverse().join('-'));
+            const lastWeeklyResetDate = new Date(lastWeeklyReset.split('/').reverse().join('-'));
+            const diffDays = Math.floor((todayDate - lastResetDate) / (1000 * 60 * 60 * 24));
+            const diffWeeks = Math.floor((todayDate - lastWeeklyResetDate) / (1000 * 60 * 60 * 24 * 7));
+
+            if (diffDays >= 1) {
+                if (dailyCount >= dailyGoal) {
+                    streak++;
+                } else {
+                    streak = 0;
+                }
+                dailyCount = 0;
+                tasks.forEach(task => {
+                    if (task.type === 'daily') task.completed = false;
+                });
+                lastReset = today;
+                localStorage.setItem('lastReset', lastReset);
+                localStorage.setItem('streak', streak);
+                localStorage.setItem('dailyCount', dailyCount);
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }
+
+            if (diffWeeks >= 1) {
+                tasks = tasks.filter(task => task.type !== 'weekly');
+                lastWeeklyReset = today;
+                localStorage.setItem('lastWeeklyReset', lastWeeklyReset);
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }
+
+            updateTasksGrid();
+            updateMissions('all');
+            updateScore();
+        }
+
+        function updateHistory() {
+            const tbody = document.getElementById('history-table-body');
+            tbody.innerHTML = '';
+            const attributeIcons = {
+                Força: 'fas fa-dumbbell',
+                Inteligência: 'fas fa-brain',
+                Vitalidade: 'fas fa-heart',
+                Sabedoria: 'fas fa-book',
+                Destreza: 'fas fa-running',
+                Humor: 'fas fa-smile'
+            };
+            completedTasks.forEach(task => {
+                const attributesHtml = (task.attributes || []).map(attr => `<i class="${attributeIcons[attr]}" title="${attr}"></i>`).join('');
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${task.name}</td>
+                    <td>${task.category}</td>
+                    <td>${task.type}</td>
+                    <td>${task.difficulty === 1 ? 'Baixa' : task.difficulty === 1.5 ? 'Média' : 'Alta'}</td>
+                    <td>${task.progress}%</td>
+                    <td>${attributesHtml}</td>
+                    <td>${task.completedDate}</td>
+                `;
+                tbody.appendChild(row);
             });
         }
 
@@ -1797,7 +1864,7 @@
         }
 
         function resetAll() {
-            if (!window.confirm('Deseja resetar todo o progresso? Isso não pode ser desfeito.')) return;
+            if (!window.confirm('Deseja resetar todo o progresso? Esta ação não pode ser desfeita.')) return;
             xp = 0;
             level = 1;
             streak = 0;
@@ -1807,11 +1874,10 @@
             attributesPoints = { Força: 0, Inteligência: 0, Vitalidade: 0, Sabedoria: 0, Destreza: 0, Humor: 0 };
             tasks = [];
             completedTasks = [];
-            savedProgress = Array(5).fill(null);
             categories = ['Saúde', 'Trabalho', 'Aprendizado', 'Lazer'];
+            savedProgress = Array(5).fill(null);
             localStorage.clear();
             localStorage.setItem('categories', JSON.stringify(categories));
-            categories.forEach(cat => xpByCategory[cat] = 0);
             localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
             updateCategorySelect();
             updateCategoryCards();
@@ -1824,81 +1890,9 @@
         }
 
         function clearCache() {
-            if (!window.confirm('Deseja apagar o cache? Isso não afetará o progresso salvo.')) return;
+            if (!window.confirm('Deseja apagar o cache? Todo o progresso será perdido.')) return;
             localStorage.clear();
-            showToast('Cache apagado com sucesso! A página será recarregada.');
-            setTimeout(() => location.reload(), 1000);
-        }
-
-        function updateHistory() {
-            const tbody = document.getElementById('history-table-body');
-            tbody.innerHTML = '';
-            completedTasks.forEach(task => {
-                const attributesHtml = (task.attributes || []).map(attr => {
-                    const attributeIcons = {
-                        Força: 'fas fa-dumbbell',
-                        Inteligência: 'fas fa-brain',
-                        Vitalidade: 'fas fa-heart',
-                        Sabedoria: 'fas fa-book',
-                        Destreza: 'fas fa-running',
-                        Humor: 'fas fa-smile'
-                    };
-                    return `<i class="${attributeIcons[attr]}" title="${attr}"></i>`;
-                }).join('');
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${task.name}</td>
-                    <td>${task.category}</td>
-                    <td>${task.type}</td>
-                    <td>${task.difficulty === 1 ? 'Fácil' : task.difficulty === 1.5 ? 'Médio' : 'Difícil'}</td>
-                    <td>${task.progress}%</td>
-                    <td>${attributesHtml}</td>
-                    <td>${task.completedDate}</td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function checkReset() {
-            const today = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-            const todayDate = new Date();
-            const lastResetDate = new Date(lastReset.split('/').reverse().join('-'));
-            const lastWeeklyResetDate = new Date(lastWeeklyReset.split('/').reverse().join('-'));
-            const oneDay = 24 * 60 * 60 * 1000;
-            const oneWeek = 7 * oneDay;
-
-            if ((todayDate - lastResetDate) >= oneDay) {
-                tasks = tasks.map(task => {
-                    if (task.type === 'daily') {
-                        return { ...task, completed: false };
-                    }
-                    return task;
-                });
-                dailyCount = 0;
-                const yesterday = new Date(todayDate - oneDay).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-                if (lastReset === yesterday && dailyCount >= dailyGoal) {
-                    streak++;
-                } else if (lastReset !== today) {
-                    streak = 0;
-                }
-                lastReset = today;
-                localStorage.setItem('tasks', JSON.stringify(tasks));
-                localStorage.setItem('dailyCount', dailyCount);
-                localStorage.setItem('streak', streak);
-                localStorage.setItem('lastReset', lastReset);
-            }
-
-            if ((todayDate - lastWeeklyResetDate) >= oneWeek) {
-                tasks = tasks.filter(task => task.type !== 'weekly');
-                xpHistory = Array(7).fill(0);
-                lastWeeklyReset = today;
-                localStorage.setItem('tasks', JSON.stringify(tasks));
-                localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
-                localStorage.setItem('lastWeeklyReset', lastWeeklyReset);
-            }
-            updateScore();
-            updateMissions('all');
-            updateTasksGrid();
+            location.reload();
         }
 
         function showToast(message) {
@@ -1912,10 +1906,12 @@
 
         function updateCharts() {
             const isLightTheme = document.body.classList.contains('light-theme');
-            const barColor = isLightTheme ? '#007bff' : '#ffd700';
-            const radarColor = isLightTheme ? 'rgba(0, 123, 255, 0.5)' : 'rgba(255, 215, 0, 0.5)';
-            const radarBorder = isLightTheme ? '#0056b3' : '#ff8c00';
+            const primaryColor = isLightTheme ? '#007bff' : '#ffd700';
+            const secondaryColor = isLightTheme ? '#0056b3' : '#ff8c00';
+            const backgroundColor = isLightTheme ? 'rgba(0, 123, 255, 0.2)' : 'rgba(255, 215, 0, 0.2)';
+            const borderColor = isLightTheme ? 'rgba(0, 123, 255, 0.8)' : 'rgba(255, 215, 0, 0.8)';
 
+            // XP Weekly Bar Chart
             const xpChartBar = new Chart(document.getElementById('xp-chart-bar'), {
                 type: 'bar',
                 data: {
@@ -1923,110 +1919,278 @@
                     datasets: [{
                         label: 'XP Ganho',
                         data: xpHistory,
-                        backgroundColor: barColor,
-                        borderColor: barColor,
-                        borderWidth: 1
+                        backgroundColor: backgroundColor,
+                        borderColor: borderColor,
+                        borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     scales: {
-                        y: { beginAtZero: true }
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'XP',
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            },
+                            grid: {
+                                color: isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Dia da Semana',
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            },
+                            grid: {
+                                color: isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            }
+                        }
                     }
                 }
             });
 
-            const tasksMonthly = Array(30).fill(0);
-            const tasksYearly = Array(12).fill(0);
+            // Tasks Completed Monthly
+            const tasksByDay = {};
             completedTasks.forEach(task => {
-                const date = new Date(task.completedDate.split('/').reverse().join('-'));
-                const dayIndex = Math.floor((new Date() - date) / (24 * 60 * 60 * 1000));
-                const monthIndex = date.getMonth();
-                if (dayIndex < 30) tasksMonthly[dayIndex]++;
-                tasksYearly[monthIndex]++;
+                const date = task.completedDate;
+                tasksByDay[date] = (tasksByDay[date] || 0) + 1;
             });
+            const monthlyLabels = Array.from({ length: 30 }, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - (29 - i));
+                return date.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+            });
+            const monthlyData = monthlyLabels.map(date => tasksByDay[date] || 0);
 
             const tasksChartMonthly = new Chart(document.getElementById('tasks-chart-monthly'), {
                 type: 'line',
                 data: {
-                    labels: Array.from({ length: 30 }, (_, i) => `Dia ${30 - i}`),
+                    labels: monthlyLabels,
                     datasets: [{
                         label: 'Tasks Concluídas',
-                        data: tasksMonthly.reverse(),
-                        borderColor: barColor,
-                        backgroundColor: radarColor,
+                        data: monthlyData,
+                        backgroundColor: backgroundColor,
+                        borderColor: borderColor,
+                        borderWidth: 2,
                         fill: true
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     scales: {
-                        y: { beginAtZero: true }
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Tasks',
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            },
+                            grid: {
+                                color: isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Dia',
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            },
+                            grid: {
+                                color: isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: isLightTheme ? '#333' : '#e0e0e0',
+                                maxTicksLimit: 10
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            }
+                        }
                     }
                 }
             });
+
+            // Tasks Completed Yearly
+            const tasksByMonth = {};
+            completedTasks.forEach(task => {
+                const date = new Date(task.completedDate.split('/').reverse().join('-'));
+                const month = date.toLocaleString('pt-BR', { month: 'short', year: 'numeric' });
+                tasksByMonth[month] = (tasksByMonth[month] || 0) + 1;
+            });
+            const yearlyLabels = Array.from({ length: 12 }, (_, i) => {
+                const date = new Date();
+                date.setMonth(date.getMonth() - (11 - i));
+                return date.toLocaleString('pt-BR', { month: 'short', year: 'numeric' });
+            });
+            const yearlyData = yearlyLabels.map(month => tasksByMonth[month] || 0);
 
             const tasksChartYearly = new Chart(document.getElementById('tasks-chart-yearly'), {
                 type: 'bar',
                 data: {
-                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                    labels: yearlyLabels,
                     datasets: [{
                         label: 'Tasks Concluídas',
-                        data: tasksYearly,
-                        backgroundColor: barColor,
-                        borderColor: barColor,
-                        borderWidth: 1
+                        data: yearlyData,
+                        backgroundColor: backgroundColor,
+                        borderColor: borderColor,
+                        borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     scales: {
-                        y: { beginAtZero: true }
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Tasks',
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            },
+                            grid: {
+                                color: isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Mês',
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            },
+                            grid: {
+                                color: isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: isLightTheme ? '#333' : '#e0e0e0',
+                                maxTicksLimit: 12
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            }
+                        }
                     }
                 }
             });
 
-            const xpChartRadar = new Chart(document.getElementById('xp-chart-radar'), {
+            // Category Performance Radar
+            const categoryRadar = new Chart(document.getElementById('xp-chart-radar'), {
                 type: 'radar',
                 data: {
                     labels: categories,
                     datasets: [{
                         label: 'XP por Categoria',
                         data: categories.map(cat => xpByCategory[cat] || 0),
-                        backgroundColor: radarColor,
-                        borderColor: radarBorder,
+                        backgroundColor: backgroundColor,
+                        borderColor: borderColor,
                         borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     scales: {
-                        r: { beginAtZero: true }
+                        r: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'XP',
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            },
+                            grid: {
+                                color: isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            },
+                            pointLabels: {
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            }
+                        }
                     }
                 }
             });
 
-            const attributeChartRadar = new Chart(document.getElementById('attribute-chart-radar'), {
+            // Attribute Performance Radar
+            const attributes = ['Força', 'Inteligência', 'Vitalidade', 'Sabedoria', 'Destreza', 'Humor'];
+            const attributeRadar = new Chart(document.getElementById('attribute-chart-radar'), {
                 type: 'radar',
                 data: {
-                    labels: ['Força', 'Inteligência', 'Vitalidade', 'Sabedoria', 'Destreza', 'Humor'],
+                    labels: attributes,
                     datasets: [{
                         label: 'Pontos por Atributo',
-                        data: Object.values(attributesPoints),
-                        backgroundColor: radarColor,
-                        borderColor: radarBorder,
+                        data: attributes.map(attr => attributesPoints[attr] || 0),
+                        backgroundColor: backgroundColor,
+                        borderColor: borderColor,
                         borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     scales: {
-                        r: { beginAtZero: true }
+                        r: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Pontos',
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            },
+                            grid: {
+                                color: isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            },
+                            pointLabels: {
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: isLightTheme ? '#333' : '#e0e0e0'
+                            }
+                        }
                     }
                 }
             });
