@@ -1351,8 +1351,11 @@
             tasks.push({ name, category, type: internalType, difficulty, attributes, completed: false, progress: 100 });
             localStorage.setItem('tasks', JSON.stringify(tasks));
             document.getElementById('task-name').value = '';
-            resetAttributeButtons();
-            initAttributeButtons();
+            document.querySelectorAll('.attribute-btn').forEach(button => {
+                button.classList.remove('selected');
+                button.removeEventListener('click', toggleAttribute);
+                button.addEventListener('click', toggleAttribute);
+            });
             updateTasksGrid();
             updateMissions('all');
             showToast('Task adicionada com sucesso!');
@@ -1592,10 +1595,6 @@
             const today = new Date();
             const dayIndex = today.getDay();
             xpHistory[dayIndex] = (xpHistory[dayIndex] || 0) + points;
-            localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
-            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
-            localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
-            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
             if (task.type === 'daily') {
                 dailyCount++;
             }
@@ -1603,20 +1602,26 @@
                 tasks.splice(index, 1);
             } else {
                 task.completed = true;
-                task.progress = 100; // Reset progress to 100% on completion
+                task.progress = 100;
             }
-            if (Math.floor(xp / 100) + 1 > level) {
-                level = Math.floor(xp / 100) + 1;
-                showToast(`Parabéns! Você subiu para o nível ${level}!`);
-            }
+            // Save to localStorage before updating UI
             localStorage.setItem('xp', xp);
             localStorage.setItem('dailyCount', dailyCount);
+            localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
+            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
+            localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
             localStorage.setItem('tasks', JSON.stringify(tasks));
-            showToast(`+${points.toFixed(0)} XP!`);
+            if (Math.floor(xp / 100) + 1 > level) {
+                level = Math.floor(xp / 100) + 1;
+                localStorage.setItem('level', level);
+                showToast(`Parabéns! Você subiu para o nível ${level}!`);
+            }
             updateMissions('all');
             updateTasksGrid();
             updateScore();
             updateHistory();
+            showToast(`+${points.toFixed(0)} XP!`);
         }
 
         function updateScore() {
@@ -1645,21 +1650,35 @@
                 if (!xpByCategory[cat]) {
                     xpByCategory[cat] = 0;
                 }
-            });
-            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
-            categories.forEach(cat => {
-                const xp = xpByCategory[cat] || 0;
-                const level = Math.floor(xp / 100) + 1;
-                const progress = xp % 100;
+                // Calculate partial progress for incomplete tasks
+                const partialXP = tasks
+                    .filter(task => task.category === cat && !task.completed)
+                    .reduce((sum, task) => {
+                        const basePoints = task.type === 'daily' ? xpDaily : task.type === 'weekly' ? xpWeekly : xpOneTime;
+                        const multiplier = task.difficulty === 1 ? difficultyMultipliers.easy : task.difficulty === 1.5 ? difficultyMultipliers.medium : task.difficulty === 2 ? difficultyMultipliers.hard : 1;
+                        return sum + (basePoints * multiplier * (task.progress / 100));
+                    }, 0);
+                const totalXP = (xpByCategory[cat] || 0) + partialXP;
+                const level = Math.floor(totalXP / 100) + 1;
+                const progress = totalXP % 100;
                 const card = document.createElement('div');
                 card.className = 'category-progress-card';
                 card.innerHTML = `
-                    <h3>${cat}</h3>
-                    <p>XP: ${xp} | Nível: ${level}</p>
-                    <progress value="${progress}" max="100"></progress>
+                    <h3>${task.name}</h3>
+                    <p>${task.category} - ${displayType}</p>
+                    <div class="attributes">${attributesHtml}</div>
+                    <div class="task-progress">
+                        <input type="range" min="0" max="100" value="${task.progress}" step="10" style="--value: ${task.progress}%;" oninput="this.style.setProperty('--value', this.value + '%'); updatePartialXP(${index}, this.value)" onchange="updatePartialXP(${index}, this.value)" aria-label="Progresso da task ${task.name}">
+                        <span>${task.progress}%</span>
+                    </div>
+                    <div class="task-actions">
+                        <button onclick="confirmToggleTask(${index})" aria-label="Completar task ${task.name}">Completar</button>
+                        ${task.type === 'daily' ? `<button class="cancel-btn" onclick="cancelTask(${index})" aria-label="Cancelar task ${task.name}">Cancelar</button>` : ''}
+                    </div>
                 `;
                 grid.appendChild(card);
             });
+            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
         }
 
         function updateAttributeProgress() {
@@ -1781,13 +1800,13 @@
         }
 
         function checkReset() {
-            const today = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-            const todayDate = new Date();
+            const today = new Date();
+            const todayStr = today.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
             const lastResetDate = new Date(lastReset.split('/').reverse().join('-'));
             const lastWeeklyResetDate = new Date(lastWeeklyReset.split('/').reverse().join('-'));
-            const diffDays = Math.floor((todayDate - lastResetDate) / (1000 * 60 * 60 * 24));
-            const diffWeeks = Math.floor((todayDate - lastWeeklyResetDate) / (1000 * 60 * 60 * 24 * 7));
-
+            const diffDays = Math.floor((today.getTime() - lastResetDate.getTime()) / (1000 * 60 * 60 * 24));
+            const diffWeeks = Math.floor((today.getTime() - lastWeeklyResetDate.getTime()) / (1000 * 60 * 60 * 24 * 7));
+        
             if (diffDays >= 1) {
                 if (dailyCount >= dailyGoal) {
                     streak++;
@@ -1798,20 +1817,20 @@
                 tasks.forEach(task => {
                     if (task.type === 'daily') task.completed = false;
                 });
-                lastReset = today;
+                lastReset = todayStr;
                 localStorage.setItem('lastReset', lastReset);
                 localStorage.setItem('streak', streak);
                 localStorage.setItem('dailyCount', dailyCount);
                 localStorage.setItem('tasks', JSON.stringify(tasks));
             }
-
-            if (diffWeeks >= 1) {
+        
+            if (diffWeeks >= 1 || today.getDay() === 1) { // Reset on Monday
                 tasks = tasks.filter(task => task.type !== 'weekly');
-                lastWeeklyReset = today;
+                lastWeeklyReset = todayStr;
                 localStorage.setItem('lastWeeklyReset', lastWeeklyReset);
                 localStorage.setItem('tasks', JSON.stringify(tasks));
             }
-
+        
             updateTasksGrid();
             updateMissions('all');
             updateScore();
@@ -1904,15 +1923,19 @@
             }, 3000);
         }
 
+        let chartInstances = {};
         function updateCharts() {
             const isLightTheme = document.body.classList.contains('light-theme');
             const primaryColor = isLightTheme ? '#007bff' : '#ffd700';
             const secondaryColor = isLightTheme ? '#0056b3' : '#ff8c00';
             const backgroundColor = isLightTheme ? 'rgba(0, 123, 255, 0.2)' : 'rgba(255, 215, 0, 0.2)';
             const borderColor = isLightTheme ? 'rgba(0, 123, 255, 0.8)' : 'rgba(255, 215, 0, 0.8)';
-
+        
+            // Destroy existing charts
+            Object.values(chartInstances).forEach(chart => chart.destroy());
+        
             // XP Weekly Bar Chart
-            const xpChartBar = new Chart(document.getElementById('xp-chart-bar'), {
+            chartInstances['xp-chart-bar'] = new Chart(document.getElementById('xp-chart-bar'), {
                 type: 'bar',
                 data: {
                     labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
@@ -1930,42 +1953,22 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'XP',
-                                color: isLightTheme ? '#333' : '#e0e0e0'
-                            },
-                            grid: {
-                                color: isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: isLightTheme ? '#333' : '#e0e0e0'
-                            }
+                            title: { display: true, text: 'XP', color: isLightTheme ? '#333' : '#e0e0e0' },
+                            grid: { color: isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: isLightTheme ? '#333' : '#e0e0e0' }
                         },
                         x: {
-                            title: {
-                                display: true,
-                                text: 'Dia da Semana',
-                                color: isLightTheme ? '#333' : '#e0e0e0'
-                            },
-                            grid: {
-                                color: isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: isLightTheme ? '#333' : '#e0e0e0'
-                            }
+                            title: { display: true, text: 'Dia da Semana', color: isLightTheme ? '#333' : '#e0e0e0' },
+                            grid: { color: isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: isLightTheme ? '#333' : '#e0e0e0' }
                         }
                     },
                     plugins: {
-                        legend: {
-                            labels: {
-                                color: isLightTheme ? '#333' : '#e0e0e0'
-                            }
-                        }
+                        legend: { labels: { color: isLightTheme ? '#333' : '#e0e0e0' } }
                     }
                 }
             });
-
+        
             // Tasks Completed Monthly
             const tasksByDay = {};
             completedTasks.forEach(task => {
@@ -1978,8 +1981,8 @@
                 return date.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
             });
             const monthlyData = monthlyLabels.map(date => tasksByDay[date] || 0);
-
-            const tasksChartMonthly = new Chart(document.getElementById('tasks-chart-monthly'), {
+        
+            chartInstances['tasks-chart-monthly'] = new Chart(document.getElementById('tasks-chart-monthly'), {
                 type: 'line',
                 data: {
                     labels: monthlyLabels,
@@ -1998,39 +2001,18 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Tasks',
-                                color: isLightTheme ? '#333' : '#e0e0e0'
-                            },
-                            grid: {
-                                color: isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: isLightTheme ? '#333' : '#e0e0e0'
-                            }
+                            title: { display: true, text: 'Tasks', color: isLightTheme ? '#333' : '#e0e0e0' },
+                            grid: { color: isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: isLightTheme ? '#333' : '#e0e0e0' }
                         },
                         x: {
-                            title: {
-                                display: true,
-                                text: 'Dia',
-                                color: isLightTheme ? '#333' : '#e0e0e0'
-                            },
-                            grid: {
-                                color: isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: isLightTheme ? '#333' : '#e0e0e0',
-                                maxTicksLimit: 10
-                            }
+                            title: { display: true, text: 'Dia', color: isLightTheme ? '#333' : '#e0e0e0' },
+                            grid: { color: isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: isLightTheme ? '#333' : '#e0e0e0', maxTicksLimit: 10 }
                         }
                     },
                     plugins: {
-                        legend: {
-                            labels: {
-                                color: isLightTheme ? '#333' : '#e0e0e0'
-                            }
-                        }
+                        legend: { labels: { color: isLightTheme ? '#333' : '#e0e0e0' } }
                     }
                 }
             });
