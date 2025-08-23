@@ -1440,7 +1440,7 @@
             const points = Math.round(basePoints * multiplier * progressFactor * (1 + streak * 0.05));
             
             // Adicionar a completedTasks para a tabela de histórico
-            completedTasks.push({ ...task, type: displayType, completedDate: new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) });
+            completedTasks.push({ ...task, type: displayType, completedDate: new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }), points });
             // Adicionar a chartData para os gráficos
             chartData.push({ ...task, type: displayType, completedDate: new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) });
             xp += points;
