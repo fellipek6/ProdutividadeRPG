@@ -574,6 +574,71 @@
                 max-width: 100%; /* Ensure it fits */
             }
         }
+        .save-grid {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 12px;
+                    grid-column: span 2;
+                    width: 100%;
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                    max-height: 500px;
+                    padding: 5px;
+                    justify-content: center;
+                }
+                
+                .save-grid::-webkit-scrollbar { width: 6px; }
+                .save-grid::-webkit-scrollbar-track { background: #212121; }
+                body.light-theme .save-grid::-webkit-scrollbar-track { background: #e6f0fa; }
+                .save-grid::-webkit-scrollbar-thumb { background: #ffd700; border-radius: 4px; }
+                body.light-theme .save-grid::-webkit-scrollbar-thumb { background: #007bff; }
+                
+                .save-card {
+                    background: linear-gradient(135deg, #424242, #212121);
+                    padding: 10px;
+                    border-radius: 8px;
+                    box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+                    transition: transform 0.2s;
+                    flex: 1 1 clamp(140px, 30vw, 160px);
+                    min-width: 0;
+                    text-align: center;
+                    min-height: 160px;
+                    box-sizing: border-box;
+                    position: relative;
+                }
+                
+                body.light-theme .save-card { background: linear-gradient(135deg, #e6f0fa, #d9e7f7); }
+                .save-card:hover { transform: scale(1.05); box-shadow: 0 5px 10px rgba(0,0,0,0.5); }
+                .save-card h4 { margin-bottom: 5px; font-size: clamp(12px, 2.5vw, 14px); }
+                .save-card p { margin: 3px 0; font-size: clamp(10px, 2.2vw, 12px); }
+                .save-card .icons { position: absolute; top: 5px; right: 5px; }
+                .save-card .icons i { cursor: pointer; font-size: clamp(12px, 3vw, 14px); color: #ffd700; transition: color 0.2s; }
+                body.light-theme .save-card .icons i { color: #007bff; }
+                .save-card .icons i:hover { color: #ff8c00; }
+                body.light-theme .save-card .icons i:hover { color: #0056b3; }
+                .save-card .task-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+                .save-card .task-actions button {
+                    background: linear-gradient(135deg, #388e3c, #2e7d32);
+                    color: #e0e0e0;
+                    border: none;
+                    padding: 6px 12px;
+                    border-radius: 16px;
+                    cursor: pointer;
+                    font-size: clamp(10px, 2.2vw, 11px);
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                    transition: transform 0.3s, box-shadow 0.3s;
+                }
+                body.light-theme .save-card .task-actions button { background: linear-gradient(135deg, #4caf50, #388e3c); color: #333; }
+                .save-card .task-actions button:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+                .save-card .task-actions button.load-btn { background: linear-gradient(135deg, #0288d1, #0277bd); }
+                body.light-theme .save-card .task-actions button.load-btn { background: linear-gradient(135deg, #42a5f5, #0288d1); }
+          @media (max-width: 400px) {
+              .task-total-card {
+                  flex: 1 1 100%;
+                  max-width: 100%;
+              }
+          }
+/* Insira os novos estilos aqui */
     </style>
 </head>
 <body>
@@ -597,6 +662,7 @@
         <button class="icon-btn" onclick="showTasks(); toggleSidebar()" aria-label="Cadastrar Tasks"><i class="fas fa-plus"></i> Cadastrar</button>
         <button class="icon-btn" onclick="showScore(); toggleSidebar()" aria-label="Ver Progresso"><i class="fas fa-trophy"></i> Progresso</button>
         <button class="icon-btn" onclick="showHistory(); toggleSidebar()" aria-label="Ver Histórico"><i class="fas fa-history"></i> Histórico</button>
+        <button class="icon-btn" onclick="showSave(); toggleSidebar()" aria-label="Salvar/Carregar"><i class="fas fa-save"></i> Salvar/Carregar</button>
         <button class="icon-btn" onclick="showSettings(); toggleSidebar()" aria-label="Configurações"><i class="fas fa-cog"></i> Configurações</button>
     </div>
     <div class="xp-bar" style="display: none;" id="xp-bar">
@@ -645,6 +711,7 @@
         <div class="tasks-grid" id="tasks-grid"></div>
         <div class="button-container">
             <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
+            <button class="reset-btn" onclick="clearAllTasks()" title="Apagar Todas as Tasks"><i class="fas fa-trash"></i> Apagar Tudo</button>
         </div>
     </div>
     <div class="container score-section" id="score-container" style="display: none;">
@@ -729,6 +796,13 @@
             <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
         </div>
     </div>
+        <div class="container save-section" id="save-container" style="display: none;">
+            <h2>Salvar/Carregar Jogo</h2>
+            <div class="save-grid" id="save-grid"></div>
+            <div class="button-container">
+                <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
+            </div>
+        </div>
     <div class="toast" id="toast"></div>
     <script>
         let chartData = JSON.parse(localStorage.getItem('chartData')) || [];
@@ -789,6 +863,7 @@
                 e.preventDefault();
                 document.getElementById('missions-grid').scrollBy({ top: Math.sign(e.deltaY) * 10, behavior: 'smooth' });
             });
+            updateSaveSlots();
         }
 
         function toggleAttribute(event) { event.currentTarget.classList.toggle('selected'); }
@@ -798,7 +873,7 @@
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
         function showSection(id) {
-            ['landing-page', 'main-menu', 'tasks-container', 'score-container', 'settings-container', 'history-container'].forEach(sec => {
+            ['landing-page', 'main-menu', 'tasks-container', 'score-container', 'settings-container', 'history-container', 'save-container'].forEach(sec => {
                 const elem = document.getElementById(sec);
                 if (elem) {
                     elem.style.display = 'none';
@@ -877,6 +952,15 @@
             updateTasksGrid();
             updateMissions('all');
             showToast('Task excluída!');
+        }
+
+        function clearAllTasks() {
+            if (!confirm('Tem certeza que deseja apagar todas as tasks cadastradas? Essa ação não pode ser desfeita.')) return;
+            tasks = [];
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            updateTasksGrid();
+            updateMissions('all');
+            showToast('Todas as tasks foram apagadas!');
         }
 
         function cancelTask(index) {
@@ -1469,7 +1553,137 @@
             }
             showToast('Histórico apagado!');
         }
+        function showSave() {
+            showSection('save-container');
+            updateSaveSlots();
+        }
         
+        function updateSaveSlots() {
+            const grid = document.getElementById('save-grid');
+            grid.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const slotData = JSON.parse(localStorage.getItem(`saveSlot${i}`)) || null;
+                const card = document.createElement('div');
+                card.className = 'save-card';
+                if (slotData) {
+                    const date = new Date(slotData.timestamp).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+                    card.innerHTML = `
+                        <h4>Slot ${i + 1}</h4>
+                        <p>Data: ${date}</p>
+                        <p>XP: ${slotData.xp}</p>
+                        <p>Nível: ${slotData.level}</p>
+                        <div class="icons">
+                            <i class="fas fa-trash" onclick="deleteSaveSlot(${i})" title="Apagar Slot"></i>
+                        </div>
+                        <div class="task-actions">
+                            <button onclick="saveToSlot(${i})">Salvar</button>
+                            <button class="load-btn" onclick="loadFromSlot(${i})">Carregar</button>
+                        </div>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <h4>Slot ${i + 1}</h4>
+                        <p>Vazio</p>
+                        <div class="task-actions">
+                            <button onclick="saveToSlot(${i})">Salvar</button>
+                        </div>
+                    `;
+                }
+                grid.appendChild(card);
+            }
+        }
+        
+        function saveToSlot(slot) {
+            const slotName = `saveSlot${slot}`;
+            const saveData = {
+                timestamp: new Date().toISOString(),
+                tasks,
+                categories,
+                xp,
+                level,
+                dailyCount,
+                streak,
+                lastReset,
+                lastWeeklyReset,
+                xpHistory,
+                xpByCategory,
+                attributesPoints,
+                xpDaily,
+                xpWeekly,
+                xpOneTime,
+                difficultyMultipliers,
+                dailyGoal,
+                weeklyGoal,
+                completedTasks,
+                chartData
+            };
+            localStorage.setItem(slotName, JSON.stringify(saveData));
+            updateSaveSlots();
+            showToast(`Jogo salvo no Slot ${slot + 1}!`);
+        }
+        
+        function loadFromSlot(slot) {
+            if (!confirm(`Carregar o jogo do Slot ${slot + 1}? Isso substituirá todos os dados atuais.`)) return;
+            const slotName = `saveSlot${slot}`;
+            const saveData = JSON.parse(localStorage.getItem(slotName));
+            if (!saveData) {
+                showToast(`Slot ${slot + 1} está vazio!`);
+                return;
+            }
+            tasks = saveData.tasks || [];
+            categories = saveData.categories || ['Saúde', 'Trabalho', 'Aprendizado', 'Lazer'];
+            xp = saveData.xp || 0;
+            level = saveData.level || 1;
+            dailyCount = saveData.dailyCount || 0;
+            streak = saveData.streak || 0;
+            lastReset = saveData.lastReset || new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+            lastWeeklyReset = saveData.lastWeeklyReset || new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+            xpHistory = saveData.xpHistory || Array(7).fill(0);
+            xpByCategory = saveData.xpByCategory || {};
+            attributesPoints = saveData.attributesPoints || { Força: 0, Inteligência: 0, Vitalidade: 0, Sabedoria: 0, Destreza: 0, Humor: 0 };
+            xpDaily = saveData.xpDaily || 10;
+            xpWeekly = saveData.xpWeekly || 50;
+            xpOneTime = saveData.xpOneTime || 20;
+            difficultyMultipliers = saveData.difficultyMultipliers || { easy: 1, medium: 1.5, hard: 2 };
+            dailyGoal = saveData.dailyGoal || 5;
+            weeklyGoal = saveData.weeklyGoal || 200;
+            completedTasks = saveData.completedTasks || [];
+            chartData = saveData.chartData || [];
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('categories', JSON.stringify(categories));
+            localStorage.setItem('xp', xp);
+            localStorage.setItem('level', level);
+            localStorage.setItem('dailyCount', dailyCount);
+            localStorage.setItem('streak', streak);
+            localStorage.setItem('lastReset', lastReset);
+            localStorage.setItem('lastWeeklyReset', lastWeeklyReset);
+            localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
+            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
+            localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
+            localStorage.setItem('xpDaily', xpDaily);
+            localStorage.setItem('xpWeekly', xpWeekly);
+            localStorage.setItem('xpOneTime', xpOneTime);
+            localStorage.setItem('difficultyMultipliers', JSON.stringify(difficultyMultipliers));
+            localStorage.setItem('dailyGoal', dailyGoal);
+            localStorage.setItem('weeklyGoal', weeklyGoal);
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            localStorage.setItem('chartData', JSON.stringify(chartData));
+            updateCategorySelect();
+            updateCategoryCards();
+            updateTasksGrid();
+            updateMissions('all');
+            updateScore();
+            updateHistory();
+            updateSaveSlots();
+            showToast(`Jogo carregado do Slot ${slot + 1}!`);
+        }
+        
+        function deleteSaveSlot(slot) {
+            if (!confirm(`Apagar o Slot ${slot + 1}? Essa ação não pode ser desfeita.`)) return;
+            localStorage.removeItem(`saveSlot${slot}`);
+            updateSaveSlots();
+            showToast(`Slot ${slot + 1} apagado!`);
+        }
         let currentHistoryView = 'table';
         let currentFilter = 'repetitivo';
         
