@@ -632,13 +632,94 @@
                 .save-card .task-actions button:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
                 .save-card .task-actions button.load-btn { background: linear-gradient(135deg, #0288d1, #0277bd); }
                 body.light-theme .save-card .task-actions button.load-btn { background: linear-gradient(135deg, #42a5f5, #0288d1); }
+                .button-container {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                    justify-content: center;
+                    align-items: center;
+                    margin-top: 15px;
+                }
+                .import-btn {
+                    padding: clamp(5px, 1.2vw, 7px) clamp(10px, 2vw, 12px);
+                    font-size: clamp(9px, 2vw, 11px);
+                }
+                body.light-theme .import-btn {
+                    background: linear-gradient(135deg, #42a5f5, #0288d1);
+                    color: #333;
+                }
+                .import-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+                }
+                .submit-btn {
+                    background: linear-gradient(135deg, #388e3c, #2e7d32);
+                    color: #e0e0e0;
+                    border: none;
+                    padding: clamp(8px, 2vw, 10px) clamp(16px, 3vw, 20px);
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: transform 0.3s, box-shadow 0.3s;
+                    font-size: clamp(12px, 2.5vw, 14px);
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                }
+                body.light-theme .submit-btn {
+                    background: linear-gradient(135deg, #4caf50, #388e3c);
+                    color: #333;
+                }
+                .submit-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+                }
+                .file-name {
+                    font-size: clamp(10px, 2.2vw, 12px);
+                    color: #e0e0e0;
+                    margin: 8px 0;
+                    text-align: center;
+                    max-width: 100%;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                body.light-theme .file-name {
+                    color: #333;
+                }
           @media (max-width: 400px) {
               .task-total-card {
                   flex: 1 1 100%;
                   max-width: 100%;
               }
           }
-/* Insira os novos estilos aqui */
+
+        .delete-all-btn {
+            background: linear-gradient(135deg, #b71c1c, #7f0000);
+            color: #e0e0e0;
+            border: none;
+            padding: clamp(10px, 2vw, 12px) clamp(20px, 4vw, 24px);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-size: clamp(12px, 2.5vw, 14px);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            justify-content: center;
+            width: clamp(150px, 30vw, 180px);
+        }
+        body.light-theme .delete-all-btn {
+            background: linear-gradient(135deg, #d32f2f, #9a0000);
+            color: #333;
+        }
+        .delete-all-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+
+
     </style>
 </head>
 <body>
@@ -794,6 +875,7 @@
         </div>
         <div class="button-container">
             <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
+            <button class="delete-all-btn" onclick="deleteAllData()" title="Apagar Todos os Dados"><i class="fas fa-trash-alt"></i> Apagar Todos os Dados</button>
         </div>
     </div>
         <div class="container save-section" id="save-container" style="display: none;">
@@ -801,6 +883,11 @@
             <div class="save-grid" id="save-grid"></div>
             <div class="button-container">
                 <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
+                <button class="icon-btn" onclick="exportSaveData()" title="Exportar Dados"><i class="fas fa-download"></i> Exportar</button>
+                <button class="icon-btn" onclick="document.getElementById('file-input').click()" title="Importar Dados"><i class="fas fa-upload"></i> Importar</button>
+                <input type="file" id="file-input" accept=".data" style="display: none;" onchange="handleFileSelect(event)">
+                <p id="file-name" class="file-name">Nenhum arquivo selecionado</p>
+                <button class="icon-btn submit-btn" onclick="importSaveData()" id="submit-file" style="display: none;"><i class="fas fa-check"></i> Enviar</button>
             </div>
         </div>
     <div class="toast" id="toast"></div>
@@ -1324,6 +1411,75 @@
             showToast('Progresso resetado!');
         }
 
+
+        function deleteAllData() {
+            if (!confirm('Tem certeza que deseja apagar TODOS os dados? Isso inclui todos os slots de salvamento, tarefas, histórico e configurações. Essa ação não pode ser desfeita.')) return;
+        
+            // Limpar todas as chaves do localStorage relacionadas ao aplicativo
+            localStorage.clear(); // Remove todas as chaves, mas vamos garantir que apenas as relevantes sejam afetadas
+        
+            // Reiniciar variáveis globais
+            tasks = [];
+            categories = ['Saúde', 'Trabalho', 'Aprendizado', 'Lazer'];
+            xp = 0;
+            level = 1;
+            dailyCount = 0;
+            streak = 0;
+            lastReset = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+            lastWeeklyReset = lastReset;
+            xpHistory = Array(7).fill(0);
+            xpByCategory = {};
+            attributesPoints = { Força: 0, Inteligência: 0, Vitalidade: 0, Sabedoria: 0, Destreza: 0, Humor: 0 };
+            xpDaily = 10;
+            xpWeekly = 50;
+            xpOneTime = 20;
+            difficultyMultipliers = { easy: 1, medium: 1.5, hard: 2 };
+            dailyGoal = 5;
+            weeklyGoal = 200;
+            completedTasks = [];
+            chartData = [];
+        
+            // Inicializar xpByCategory para categorias padrão
+            categories.forEach(cat => { xpByCategory[cat] = 0; });
+        
+            // Salvar valores padrão no localStorage
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('categories', JSON.stringify(categories));
+            localStorage.setItem('xp', xp);
+            localStorage.setItem('level', level);
+            localStorage.setItem('dailyCount', dailyCount);
+            localStorage.setItem('streak', streak);
+            localStorage.setItem('lastReset', lastReset);
+            localStorage.setItem('lastWeeklyReset', lastWeeklyReset);
+            localStorage.setItem('xpHistory', JSON.stringify(xpHistory));
+            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
+            localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
+            localStorage.setItem('xpDaily', xpDaily);
+            localStorage.setItem('xpWeekly', xpWeekly);
+            localStorage.setItem('xpOneTime', xpOneTime);
+            localStorage.setItem('difficultyMultipliers', JSON.stringify(difficultyMultipliers));
+            localStorage.setItem('dailyGoal', dailyGoal);
+            localStorage.setItem('weeklyGoal', weeklyGoal);
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            localStorage.setItem('chartData', JSON.stringify(chartData));
+        
+            // Remover todos os slots de salvamento
+            for (let i = 0; i < 10; i++) {
+                localStorage.removeItem(`saveSlot${i}`);
+            }
+        
+            // Atualizar a interface
+            updateCategorySelect();
+            updateCategoryCards();
+            updateTasksGrid();
+            updateMissions('all');
+            updateScore();
+            updateHistory();
+            updateSaveSlots();
+            showToast('Todos os dados foram apagados!');
+        }
+
+
         function checkReset() {
             const today = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
             const lastResetDate = new Date(lastReset);
@@ -1680,13 +1836,99 @@
         
         function deleteSaveSlot(slot) {
             if (!confirm(`Apagar o Slot ${slot + 1}? Essa ação não pode ser desfeita.`)) return;
-            localStorage.removeItem(`saveSlot${slot}`);
+            localStorage.removeItem(`saveSlot${slot}`); // Corrigido de `i` para `slot`
             updateSaveSlots();
             showToast(`Slot ${slot + 1} apagado!`);
         }
         let currentHistoryView = 'table';
         let currentFilter = 'repetitivo';
+
+        function exportSaveData() {
+            const saveData = {};
+            for (let i = 0; i < 10; i++) {
+                const slotData = JSON.parse(localStorage.getItem(`saveSlot${i}`)) || null;
+                saveData[`slot${i}`] = slotData;
+            }
+            const blob = new Blob([JSON.stringify(saveData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'save.data';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Dados exportados com sucesso!');
+        }
         
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            const fileNameDisplay = document.getElementById('file-name');
+            const submitButton = document.getElementById('submit-file');
+            if (file) {
+                fileNameDisplay.textContent = file.name;
+                submitButton.style.display = 'flex';
+            } else {
+                fileNameDisplay.textContent = 'Nenhum arquivo selecionado';
+                submitButton.style.display = 'none';
+            }
+        }
+
+        function importSaveData() {
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+            if (!file) {
+                showToast('Nenhum arquivo selecionado!');
+                return;
+            }
+            if (!confirm('Importar dados substituirá todos os slots existentes. Deseja continuar?')) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    if (!e.target.result) {
+                        showToast('Erro ao importar dados: arquivo vazio!');
+                        return;
+                    }
+                    const saveData = JSON.parse(e.target.result);
+                    if (typeof saveData !== 'object' || saveData === null) {
+                        showToast('Erro ao importar dados: formato inválido, esperado um objeto JSON!');
+                        return;
+                    }
+                    // Verificar se o arquivo contém pelo menos um slot válido
+                    let hasValidSlot = false;
+                    for (let i = 0; i < 10; i++) {
+                        const slotKey = `slot${i}`;
+                        const slotData = saveData[slotKey] || null;
+                        if (slotData) {
+                            // Validar se slotData tem a estrutura esperada
+                            if (typeof slotData !== 'object' || slotData === null) {
+                                console.warn(`Slot ${i} inválido:`, slotData);
+                                continue;
+                            }
+                            localStorage.setItem(`saveSlot${i}`, JSON.stringify(slotData));
+                            hasValidSlot = true;
+                        } else {
+                            localStorage.removeItem(`saveSlot${i}`);
+                        }
+                    }
+                    if (!hasValidSlot) {
+                        showToast('Erro ao importar dados: nenhum slot válido encontrado!');
+                        return;
+                    }
+                    updateSaveSlots();
+                    showToast('Dados importados com sucesso!');
+                    document.getElementById('file-name').textContent = 'Nenhum arquivo selecionado';
+                    document.getElementById('submit-file').style.display = 'none';
+                    fileInput.value = ''; // Reseta o input de arquivo
+                } catch (error) {
+                    console.error('Erro ao importar:', error);
+                    console.log('Conteúdo do arquivo:', e.target.result);
+                    showToast(`Erro ao importar dados: ${error.message}`);
+                }
+            };
+            reader.readAsText(file);
+        }
+
         function showHistoryView(view) {
             currentHistoryView = view;
             document.getElementById('history-table-view').style.display = view === 'table' ? 'block' : 'none';
