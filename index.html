@@ -585,12 +585,13 @@
         <h2>Histórico de Tasks Concluídas</h2>
         <table class="history-table">
             <thead>
-                <tr><th>Nome</th><th>Categoria</th><th>Tipo</th><th>Pontuação</th><th>Progresso (%)</th><th>Atributos</th><th>Data de Conclusão</th></tr>
+                <tr><th>Nome</th><th>Categoria</th><th>Tipo</th><th>Total (%)</th><th>Data</th></tr>
             </thead>
             <tbody id="history-table-body"></tbody>
         </table>
         <div class="button-container">
             <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
+            <button class="reset-btn" onclick="clearHistory()" title="Apagar Histórico"><i class="fas fa-trash"></i> Apagar Histórico</button>
         </div>
     </div>
     <div class="container settings-section" id="settings-container" style="display: none;">
@@ -624,6 +625,8 @@
     </div>
     <div class="toast" id="toast"></div>
     <script>
+        let chartData = JSON.parse(localStorage.getItem('chartData')) || [];
+        let currentCategory = 'all'; // Adiciona no início do script, junto com outras variáveis globais
         let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         let categories = JSON.parse(localStorage.getItem('categories')) || ['Saúde', 'Trabalho', 'Aprendizado', 'Lazer'];
         let xp = parseInt(localStorage.getItem('xp')) || 0;
@@ -659,6 +662,7 @@
         function init() {
             categories.forEach(cat => { if (!xpByCategory[cat]) xpByCategory[cat] = 0; });
             localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
+            localStorage.setItem('chartData', JSON.stringify(chartData)); // Inicializar chartData no localStorage
             updateCategorySelect();
             updateCategoryCards();
             updateTasksGrid();
@@ -775,9 +779,10 @@
             if (task.type !== 'daily') return showToast('Apenas tasks diárias podem ser canceladas.');
             task.completed = true;
             task.lastCompleted = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-            completedTasks.push({ ...task, type: 'Diário', completedDate: task.lastCompleted });
-            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            // Remover a linha que adiciona ao completedTasks
+            // completedTasks.push({ ...task, type: 'Diário', completedDate: task.lastCompleted });
             localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
             updateMissions('all');
             updateTasksGrid();
             updateHistory();
@@ -901,6 +906,7 @@
         }
 
         function updateMissions(category) {
+            currentCategory = category;
             const grid = document.getElementById('missions-grid');
             grid.innerHTML = '';
             let filteredTasks = tasks.filter(task => !task.completed);
@@ -932,7 +938,7 @@
         const debouncedUpdatePartialXP = debounce((index, value) => {
             tasks[index].progress = parseInt(value);
             localStorage.setItem('tasks', JSON.stringify(tasks));
-            updateMissions('all');
+            updateMissions(currentCategory);
             const button = document.querySelectorAll('.mission-card')[tasks.indexOf(tasks[index])].querySelector('button');
             button.disabled = parseInt(value) < 10;
         }, 100);
@@ -951,12 +957,13 @@
             const displayType = task.type === 'daily' ? 'Diário' : task.type === 'weekly' ? 'Semanal' : 'Única';
             const basePoints = task.type === 'daily' ? xpDaily : task.type === 'weekly' ? xpWeekly : xpOneTime;
             const multiplier = task.difficulty === 1 ? difficultyMultipliers.easy : task.difficulty === 1.5 ? difficultyMultipliers.medium : difficultyMultipliers.hard;
-            
-            // Ajuste para incluir o progresso (task.progress / 100) no cálculo do XP
-            const progressFactor = task.progress / 100; // Fator baseado na porcentagem (0 a 1)
+            const progressFactor = task.progress / 100; 
             const points = Math.round(basePoints * multiplier * progressFactor * (1 + streak * 0.05));
-        
+            
+            // Adicionar a completedTasks para a tabela de histórico
             completedTasks.push({ ...task, type: displayType, completedDate: new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) });
+            // Adicionar a chartData para os gráficos
+            chartData.push({ ...task, type: displayType, completedDate: new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) });
             xp += points;
             xpByCategory[task.category] = (xpByCategory[task.category] || 0) + points;
             const pointsPerAttribute = task.attributes.length > 0 ? Math.floor(points / task.attributes.length) : 0;
@@ -984,8 +991,9 @@
             localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
             localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
             localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            localStorage.setItem('chartData', JSON.stringify(chartData)); // Salvar chartData no localStorage
             showToast(`+${points} XP!`);
-            updateMissions('all');
+            updateMissions(currentCategory);
             updateTasksGrid();
             updateScore();
             updateHistory();
@@ -1042,11 +1050,9 @@
         function updateHistory() {
             const tableBody = document.getElementById('history-table-body');
             tableBody.innerHTML = '';
-            const attributeIcons = { Força: 'fas fa-dumbbell', Inteligência: 'fas fa-brain', Vitalidade: 'fas fa-heart', Sabedoria: 'fas fa-book', Destreza: 'fas fa-running', Humor: 'fas fa-smile' };
             completedTasks.forEach(task => {
-                const attributesHtml = task.attributes.map(attr => `<i class="${attributeIcons[attr]}" title="${attr}"></i>`).join('');
                 const row = document.createElement('tr');
-                row.innerHTML = `<td>${task.name}</td><td>${task.category}</td><td>${task.type}</td><td>${task.difficulty}</td><td>${task.progress}%</td><td>${attributesHtml}</td><td>${task.completedDate}</td>`;
+                row.innerHTML = `<td>${task.name}</td><td>${task.category}</td><td>${task.type}</td><td>${task.progress}%</td><td>${task.completedDate}</td>`;
                 tableBody.appendChild(row);
             });
         }
@@ -1071,7 +1077,7 @@
         }
 
         function resetAll() {
-            if (!confirm('Resetar todo o progresso? Isso não pode ser desfeito.')) return;
+            if (!confirm('Resetar todo o progresso? Isso não pode be desfeito.')) return;
             
             // Resetar variáveis de progresso
             xp = 0;
@@ -1084,6 +1090,7 @@
             xpByCategory = {};
             attributesPoints = { Força: 0, Inteligência: 0, Vitalidade: 0, Sabedoria: 0, Destreza: 0, Humor: 0 };
             completedTasks = [];
+            chartData = []; // Resetar chartData
         
             // Resetar progresso das tarefas existentes (mantendo as tarefas)
             tasks = tasks.map(task => ({
@@ -1107,6 +1114,7 @@
             localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
             localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
             localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            localStorage.setItem('chartData', JSON.stringify(chartData)); // Salvar chartData
             localStorage.setItem('tasks', JSON.stringify(tasks));
             localStorage.setItem('categories', JSON.stringify(categories));
             localStorage.setItem('xpDaily', xpDaily);
@@ -1177,21 +1185,19 @@
             charts.xpChartBar = new Chart(document.getElementById('xp-chart-bar'), {
                 type: 'bar',
                 data: { labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'], datasets: [{ label: 'XP Semanal', data: xpHistory, backgroundColor, borderColor, borderWidth: 1 }] },
-                options: {scales: { y: {beginAtZero: true,
-                ticks: { color: fontColor }},
-                x: {ticks: { color: fontColor }}},
-            plugins: {
-                legend: {
-                    labels: { color: fontColor } // Cor da fonte da legenda
+                options: {
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: fontColor } },
+                        x: { ticks: { color: fontColor } }
+                    },
+                    plugins: { legend: { labels: { color: fontColor } } }
                 }
-            }
-        }
             });
             const monthlyTasks = Array(30).fill(0);
             const yearlyTasks = Array(12).fill(0);
             const today = new Date();
             const currentYear = today.getFullYear();
-            completedTasks.forEach(task => {
+            chartData.forEach(task => { // Alterado de completedTasks para chartData
                 const taskDate = new Date(task.completedDate.split('/').reverse().join('-'));
                 const diffDays = Math.floor((today - taskDate) / (1000 * 60 * 60 * 24));
                 if (diffDays < 30) monthlyTasks[29 - diffDays]++;
@@ -1211,51 +1217,79 @@
                 type: 'line',
                 data: { labels: Array.from({ length: 30 }, (_, i) => `${29 - i} dias atrás`), datasets: [{ label: 'Tasks Concluídas (Mensal)', data: monthlyTasks, backgroundColor, borderColor, fill: false, tension: 0.1 }] },
                 options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: fontColor } // Cor da fonte dos ticks do eixo Y
-                },
-                x: {
-                    ticks: { color: fontColor } // Cor da fonte dos ticks do eixo X
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: fontColor } },
+                        x: { ticks: { color: fontColor } }
+                    },
+                    plugins: { legend: { labels: { color: fontColor } } }
                 }
-            },
-            plugins: {
-                legend: {
-                    labels: { color: fontColor } // Cor da fonte da legenda
-                }
-            }
-        }
             });
             if (charts.tasksChartYearly) charts.tasksChartYearly.destroy();
             charts.tasksChartYearly = new Chart(document.getElementById('tasks-chart-yearly'), {
                 type: 'bar',
                 data: {
                     labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-                    datasets: [{
-                        label: 'Tasks Concluídas (Anual)',
-                        data: yearlyTasks,
-                        backgroundColor,
-                        borderColor,
-                        borderWidth: 1
+                    datasets: [{ label: 'Tasks Concluídas (Anual)', data: yearlyTasks, backgroundColor, borderColor, borderWidth: 1 }]
+                },
+                options: {
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: fontColor } },
+                        x: { ticks: { color: fontColor } }
+                    },
+                    plugins: { legend: { labels: { color: fontColor } } }
+                }
+            });
+            if (charts.xpChartRadar) charts.xpChartRadar.destroy();
+            charts.xpChartRadar = new Chart(document.getElementById('xp-chart-radar'), {
+                type: 'radar',
+                data: { 
+                    labels: categories, 
+                    datasets: [{ 
+                        label: 'XP por Categoria', 
+                        data: categories.map(cat => Math.floor(xpByCategory[cat] || 0)), 
+                        backgroundColor: 'transparent', 
+                        borderColor, 
+                        borderWidth: 1 
                     }]
                 },
                 options: {
-                  scales: {
-                      y: {
-                          beginAtZero: true,
-                          ticks: { color: fontColor } // Cor da fonte dos ticks do eixo Y
-                      },
-                      x: {
-                          ticks: { color: fontColor } // Cor da fonte dos ticks do eixo X
-                      }
-                  },
-                  plugins: {
-                      legend: {
-                          labels: { color: fontColor } // Cor da fonte da legenda
-                      }
-                  }
-              }
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            ticks: { color: fontColor, backdropColor: 'transparent' },
+                            pointLabels: { color: fontColor },
+                            grid: { color: isLightTheme ? '#ccc' : '#555' },
+                            angleLines: { color: isLightTheme ? '#ccc' : '#555' }
+                        }
+                    },
+                    plugins: { legend: { labels: { color: fontColor } } }
+                }
+            });
+            if (charts.attributeChartRadar) charts.attributeChartRadar.destroy();
+            charts.attributeChartRadar = new Chart(document.getElementById('attribute-chart-radar'), {
+                type: 'radar',
+                data: { 
+                    labels: Object.keys(attributesPoints), 
+                    datasets: [{ 
+                        label: 'XP por Atributo', 
+                        data: Object.values(attributesPoints).map(x => Math.floor(x)), 
+                        backgroundColor: 'transparent', 
+                        borderColor, 
+                        borderWidth: 1 
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            ticks: { color: fontColor, backdropColor: 'transparent' },
+                            pointLabels: { color: fontColor },
+                            grid: { color: isLightTheme ? '#ccc' : '#555' },
+                            angleLines: { color: isLightTheme ? '#ccc' : '#555' }
+                        }
+                    },
+                    plugins: { legend: { labels: { color: fontColor } } }
+                }
             });
             if (charts.xpChartRadar) charts.xpChartRadar.destroy();
             charts.xpChartRadar = new Chart(document.getElementById('xp-chart-radar'), {
@@ -1318,7 +1352,13 @@
               }
             });
         }
-
+        function clearHistory() {
+            if (!confirm('Tem certeza que deseja apagar todo o histórico? Essa ação não pode ser desfeita.')) return;
+            completedTasks = [];
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            updateHistory();
+            showToast('Histórico apagado!');
+        }
         window.addEventListener('load', () => {
             init();
             const savedTheme = localStorage.getItem('theme');
