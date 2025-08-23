@@ -1462,7 +1462,11 @@
             if (!confirm('Tem certeza que deseja apagar todo o histórico? Essa ação não pode ser desfeita.')) return;
             completedTasks = [];
             localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
-            updateHistory();
+            if (currentHistoryView === 'table') {
+                updateHistory();
+            } else {
+                updateTaskTotals();
+            }
             showToast('Histórico apagado!');
         }
         
