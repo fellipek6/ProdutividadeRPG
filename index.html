@@ -338,7 +338,7 @@
         }
         body.light-theme .mission-card { background: linear-gradient(135deg, #e6f0fa, #d9e7f7); }
         @media (max-width: 600px) { .mission-card { flex: 1 1 clamp(120px, 45vw, 140px); min-height: 160px; } }
-        @media (max-width: 400px) { .mission-card { flex: 1 1 100%; min-height: 140px; } }
+        @media (max-width: 400px) { .mission-card { flex: 1 1 95%; min-height: 140px; } }
         .mission-card:hover { transform: scale(1.05); box-shadow: 0 5px 10px rgba(0,0,0,0.5); }
         .mission-card .attributes { display: flex; gap: clamp(6px, 1.5vw, 8px); justify-content: center; margin-bottom: 8px; flex-wrap: wrap; }
         .mission-card .attributes i { font-size: clamp(10px, 2.5vw, 12px); color: #ffd700; }
@@ -361,8 +361,8 @@
         .mission-card button:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
         .mission-card input[type="range"] {
             -webkit-appearance: none;
-            width: 100%;
-            max-width: 120px;
+            width: 95%;
+            max-width: 100px;
             height: 6px;
             background: linear-gradient(to right, #4b0082 0%, #4b0082 var(--value), #8a2be2 var(--value), #8a2be2 100%);
             border: 1px solid #ffd700;
@@ -537,7 +537,7 @@
             box-shadow: 0 3px 6px rgba(0,0,0,0.4);
             transition: transform 0.2s;
             flex: 1 1 clamp(140px, 30vw, 160px); /* Keep flexible sizing */
-            max-width: 100%; /* Prevent cards from exceeding container width */
+            max-width: 95%; /* Prevent cards from exceeding container width */
             min-width: 0; /* Allow cards to shrink if needed */
             text-align: center;
             box-sizing: border-box; /* Include padding/borders in width */
@@ -564,14 +564,14 @@
         @media (max-width: 600px) {
             .task-total-card {
                 flex: 1 1 clamp(120px, 45vw, 140px); /* Adjust for smaller screens */
-                max-width: 100%; /* Ensure it fits within container */
+                max-width: 95%; /* Ensure it fits within container */
             }
         }
         
         @media (max-width: 400px) {
             .task-total-card {
                 flex: 1 1 100%; /* Full width on very small screens */
-                max-width: 100%; /* Ensure it fits */
+                max-width: 95%; /* Ensure it fits */
             }
         }
         .save-grid {
@@ -679,7 +679,7 @@
                     color: #e0e0e0;
                     margin: 8px 0;
                     text-align: center;
-                    max-width: 100%;
+                    max-width: 95%;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
@@ -689,8 +689,8 @@
                 }
           @media (max-width: 400px) {
               .task-total-card {
-                  flex: 1 1 100%;
-                  max-width: 100%;
+                  flex: 1 1 95%;
+                  max-width: 95%;
               }
           }
 
@@ -720,6 +720,29 @@
         }
 
 
+
+        .task-total-card .icons {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: flex;
+            gap: 8px;
+        }
+        .task-total-card .icons i {
+            cursor: pointer;
+            font-size: clamp(12px, 3vw, 14px);
+            color: #ffd700;
+            transition: color 0.2s;
+        }
+        body.light-theme .task-total-card .icons i {
+            color: #007bff;
+        }
+        .task-total-card .icons i:hover {
+            color: #ff8c00;
+        }
+        body.light-theme .task-total-card .icons i:hover {
+            color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -792,7 +815,7 @@
         <div class="tasks-grid" id="tasks-grid"></div>
         <div class="button-container">
             <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
-            <button class="reset-btn" onclick="clearAllTasks()" title="Apagar Todas as Tasks"><i class="fas fa-trash"></i> Apagar Tudo</button>
+            <button class="reset-btn" onclick="clearAllTasks()" title="Apagar Todas as Tasks"><i class="fas fa-trash"></i> Apagar todas as Tasks</button>
         </div>
     </div>
     <div class="container score-section" id="score-container" style="display: none;">
@@ -1980,6 +2003,9 @@
                     <h4>${name}</h4>
                     <p>Vezes Feita: ${data.count}</p>
                     <p>XP Total: ${data.totalXP}</p>
+                    <div class="icons">
+                        <i class="fas fa-trash" onclick="deleteTaskHistory('${name}')" title="Excluir Task do Histórico"></i>
+                    </div>
                 `;
                 grid.appendChild(card);
             });
@@ -1988,7 +2014,30 @@
                 grid.innerHTML = '<p>Nenhuma task encontrada.</p>';
             }
         }
-        
+
+
+        function deleteTaskHistory(taskName) {
+            if (!confirm(`Excluir todas as entradas de "${taskName}" do histórico? Essa ação não pode ser desfeita.`)) return;
+            // Filtrar completedTasks para remover todas as entradas com o nome da tarefa
+            completedTasks = completedTasks.filter(task => task.name !== taskName);
+            // Filtrar chartData para remover entradas correspondentes (se necessário)
+            chartData = chartData.filter(task => task.name !== taskName);
+            // Salvar as alterações no localStorage
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            localStorage.setItem('chartData', JSON.stringify(chartData));
+            // Atualizar a visualização
+            if (currentHistoryView === 'table') {
+                updateHistory();
+            } else {
+                updateTaskTotals();
+            }
+            // Atualizar gráficos, pois chartData foi alterado
+            updateCharts();
+            showToast(`Histórico de "${taskName}" apagado!`);
+        }
+
+
+
         window.addEventListener('load', () => {
             init();
             const savedTheme = localStorage.getItem('theme');
