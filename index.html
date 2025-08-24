@@ -2798,7 +2798,74 @@
             updateCharts();
         });
         
+
+
+        function resetDailyTasks() {
+            const today = new Date().toISOString().split('T')[0]; // Data atual no formato YYYY-MM-DD
+            const lastDailyReset = localStorage.getItem('lastDailyReset');
         
+            if (lastDailyReset !== today) {
+                let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                
+                // Resetar tarefas diárias: desmarcar como concluídas
+                tasks = tasks.map(task => {
+                    if (task.tipo === 'Diário') {
+                        task.concluida = false;
+                    }
+                    return task;
+                });
+        
+                // Salvar tasks atualizadas
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                localStorage.setItem('lastDailyReset', today);
+                console.log('Tarefas diárias resetadas automaticamente.');
+            }
+        }
+        
+        function resetWeeklyTasks() {
+            const today = new Date();
+            const isSunday = today.getDay() === 0; // 0 é domingo
+            const currentWeek = getWeekNumber(today); // Função para obter número da semana
+            const lastWeeklyReset = localStorage.getItem('lastWeeklyReset');
+        
+            if (isSunday && lastWeeklyReset !== currentWeek) {
+                let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                
+                // Resetar tarefas semanais: desmarcar como concluídas
+                tasks = tasks.map(task => {
+                    if (task.tipo === 'Semanal') {
+                        task.concluida = false;
+                    }
+                    return task;
+                });
+        
+                // Salvar tasks atualizadas
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                localStorage.setItem('lastWeeklyReset', currentWeek);
+                console.log('Tarefas semanais resetadas automaticamente.');
+            }
+        }
+        
+        // Função para calcular o número da semana no ano (ISO 8601)
+        function getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7; // Domingo é 0, ajusta para 7
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum); // Ajusta para o primeiro dia da semana
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+        
+        // Executa ambos os resets ao carregar a página
+        window.addEventListener('load', () => {
+            resetDailyTasks();
+            resetWeeklyTasks();
+            // Chame funções existentes para atualizar a UI, ex.:
+            // loadTasks();
+            // updateProgress();
+        });
+
+
+
     </script>
     
 </body>
