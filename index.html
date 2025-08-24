@@ -1187,8 +1187,8 @@
         <h3>Tasks Cadastradas</h3>
         <div class="tasks-grid" id="tasks-grid"></div>
         <div class="button-container">
-            <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
-            <button class="reset-btn" onclick="clearAllTasks()" title="Apagar Todas as Tasks"><i class="fas fa-trash"></i> Apagar todas as Tasks</button>
+            <button class="reset-btn" onclick="showMenu()"><i class="fas fa-home"></i>Menu Principal</button>
+            <button class="delete-all-btn" onclick="clearAllTasks()" title="Apagar Tasks"><i class="fas fa-trash"></i> Apagar Tasks</button>
         </div>
     </div>
     <div class="container score-section" id="score-container" style="display: none;">
@@ -1215,8 +1215,8 @@
             
         </div>
         <div class="button-container">
-            <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
-            <button class="reset-btn" onclick="resetAll()" title="Resetar Progresso"><i class="fas fa-redo"></i> Resetar Tudo</button>
+            <button class="reset-btn" onclick="showMenu()"><i class="fas fa-home"></i>Menu Principal</button>
+            <button class="delete-all-btn" onclick="resetAll()" title="Resetar Progresso"><i class="fas fa-redo"></i> Resetar Tudo</button>
         </div>
     </div>
         <div class="container history-section" id="history-container" style="display: none;">
@@ -1242,8 +1242,8 @@
                 <div class="task-total-grid" id="task-total-grid"></div>
             </div>
             <div class="button-container">
-                <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
-                <button class="reset-btn" onclick="clearHistory()" title="Apagar Histórico"><i class="fas fa-trash"></i> Apagar Histórico</button>
+                <button class="reset-btn" onclick="showMenu()"><i class="fas fa-home"></i>Menu Principal</button>
+                <button class="delete-all-btn" onclick="clearHistory()" title="Apagar Histórico"><i class="fas fa-trash"></i> Apagar Histórico</button>
             </div>
         </div>
     <div class="container settings-section" id="settings-container" style="display: none;">
@@ -1272,15 +1272,15 @@
             </div>
         </div>
         <div class="button-container">
-            <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
-            <button class="delete-all-btn" onclick="deleteAllData()" title="Apagar Todos os Dados"><i class="fas fa-trash-alt"></i> Apagar Todos os Dados</button>
+            <button class="reset-btn" onclick="showMenu()"><i class="fas fa-home"></i>Menu Principal</button>
+            <button class="delete-all-btn" onclick="deleteAllData()" title="Apagar Todos os Dados"><i class="fas fa-trash-alt"></i> Resetar jogo</button>
         </div>
     </div>
         <div class="container save-section" id="save-container" style="display: none;">
             <h2>Salvar/Carregar Jogo</h2>
             <div class="save-grid" id="save-grid"></div>
             <div class="button-container">
-                <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
+                <button class="reset-btn" onclick="showMenu()"><i class="fas fa-home"></i>Menu Principal</button>
                 <button class="icon-btn" onclick="exportSaveData()" title="Exportar Dados"><i class="fas fa-download"></i> Exportar</button>
                 <button class="icon-btn" onclick="document.getElementById('file-input').click()" title="Importar Dados"><i class="fas fa-upload"></i> Importar</button>
                 <input type="file" id="file-input" accept=".json" style="display: none;" onchange="handleFileSelect(event)">
