@@ -288,14 +288,17 @@
             transition: transform 0.2s, box-shadow 0.2s;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
             width: 100%;
             max-width: 300px;
             min-width: 0;
-            font-size: clamp(9px, 2vw, 11px);
+            font-size: clamp(12px, 5vw, 15px);
             margin: 0 auto;
             box-sizing: border-box;
         }
+        .task-card .task-content {
+          text-align: center;
+      }
         body.light-theme .task-card { background: linear-gradient(135deg, #e6f0fa, #d9e7f7); }
         .task-card:hover { transform: scale(1.05); box-shadow: 0 5px 10px rgba(0,0,0,0.5); }
         .task-card .icons { display: flex; gap: 8px; justify-content: flex-end; }
@@ -829,6 +832,75 @@
         }
 
 
+        /* Estilo para os botões de paginação */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: clamp(8px, 2vw, 10px);
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .pagination-btn {
+            background: linear-gradient(135deg, #0288d1, #0277bd);
+            color: #e0e0e0;
+            border: none;
+            padding: clamp(6px, 1.5vw, 8px) clamp(12px, 2.5vw, 15px);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: clamp(10px, 2.2vw, 12px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+        }
+        
+        body.light-theme .pagination-btn {
+            background: linear-gradient(135deg, #42a5f5, #0288d1);
+            color: #333;
+        }
+        
+        .pagination-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        
+        .pagination-btn.active {
+            background: linear-gradient(135deg, #388e3c, #2e7d32);
+        }
+        
+        body.light-theme .pagination-btn.active {
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+        }
+        
+        .pagination-btn:disabled {
+            background: linear-gradient(135deg, #616161, #424242);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        body.light-theme .pagination-btn:disabled {
+            background: linear-gradient(135deg, #b0bec5, #90a4ae);
+        }
+
+        .task-card .attributes, .mission-card .attributes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center; /* Alinhar à esquerda para melhor organização */
+            min-height: 20px; /* Garantir espaço mínimo para os ícones */
+        }
+        
+        .task-card .attributes i, .mission-card .attributes i {
+            font-size: clamp(12px, 3vw, 14px);
+            color: #ffd700;
+        }
+        
+        body.light-theme .task-card .attributes i, body.light-theme .mission-card .attributes i {
+            color: #007bff;
+        }
+
+
+
     </style>
 </head>
 <body>
@@ -937,14 +1009,15 @@
                 <button class="sub-tab-btn active" onclick="showHistoryView('table')">Tabela</button>
                 <button class="sub-tab-btn" onclick="showHistoryView('total')">Cards</button>
             </div>
-            <div id="history-table-view">
-                <table class="history-table">
-                    <thead>
-                        <tr><th>Nome</th><th>Categoria</th><th>Tipo</th><th>Total (%)</th><th>Data</th></tr>
-                    </thead>
-                    <tbody id="history-table-body"></tbody>
-                </table>
-            </div>
+          <div id="history-table-view">
+              <table class="history-table">
+                  <thead>
+                      <tr><th>Nome</th><th>Categoria</th><th>Tipo</th><th>Total (%)</th><th>Data</th></tr>
+                  </thead>
+                  <tbody id="history-table-body"></tbody>
+              </table>
+              <div class="pagination-container" id="pagination-controls"></div>
+          </div>
             <div id="task-total-view" style="display: none;">
                 <div class="filter-buttons">
                     <button class="filter-btn active" onclick="filterTaskTotals('repetitivo')">Repetitivo</button>
@@ -1022,6 +1095,10 @@
         let weeklyGoal = parseInt(localStorage.getItem('weeklyGoal')) || 200;
         let completedTasks = JSON.parse(localStorage.getItem('completedTasks')) || [];
         let charts = {};
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        
+        
 
         function debounce(func, wait) {
             let timeout;
@@ -1098,7 +1175,10 @@
         function showTasks() { showSection('tasks-container'); }
         function showScore() { showSection('score-container'); }
         function showSettings() { showSection('settings-container'); }
-        function showHistory() { showSection('history-container'); }
+        function showHistory() {
+            currentPage = 1; // Resetar a página ao abrir a aba
+            showSection('history-container');
+        }
 
         function toggleTheme() {
             document.body.classList.toggle('light-theme');
@@ -1111,10 +1191,15 @@
             const category = document.getElementById('task-category').value;
             const type = document.getElementById('task-type').value;
             const difficulty = parseFloat(document.getElementById('task-difficulty').value);
-            const attributes = Array.from(document.querySelectorAll('.attribute-btn.selected')).map(btn => btn.getAttribute('data-attribute'));
+            const attributes = Array.from(new Set(
+                Array.from(document.querySelectorAll('#attribute-buttons .attribute-btn.selected'))
+                    .map(btn => btn.getAttribute('data-attribute'))
+            ));
+        
             if (!name) return showToast('Insira o nome da task.');
             if (!category) return showToast('Selecione uma categoria.');
             if (attributes.length === 0) return showToast('Selecione pelo menos um atributo.');
+        
             tasks.push({ 
                 name, 
                 category, 
@@ -1125,6 +1210,7 @@
                 progress: 0,
                 lastCompleted: null
             });
+        
             localStorage.setItem('tasks', JSON.stringify(tasks));
             document.getElementById('task-name').value = '';
             resetAttributeButtons();
@@ -1192,7 +1278,15 @@
             };
             tasks.forEach((task, index) => {
                 const displayType = task.type === 'daily' ? 'Diário' : task.type === 'weekly' ? 'Semanal' : 'Única';
-                const attributesHtml = task.attributes.map(attr => `<i class="${attributeIcons[attr]}" title="${attr}"></i>`).join('');
+                // Usar Set para garantir atributos únicos
+                const uniqueAttributes = Array.from(new Set(task.attributes));
+                const attributesHtml = uniqueAttributes.map(attr => {
+                    if (attributeIcons[attr]) {
+                        return `<i class="${attributeIcons[attr]}" title="${attr}"></i>`;
+                    }
+                    return ''; // Ignorar atributos inválidos
+                }).join('');
+                
                 const card = document.createElement('div');
                 card.className = 'task-card';
                 card.innerHTML = `
@@ -1233,8 +1327,7 @@
                 grid.appendChild(card);
                 // Adicionar eventos de clique aos botões de atributos no formulário de edição
                 card.querySelectorAll('.edit-form .attribute-btn').forEach(btn => {
-                    // Remover eventos anteriores para evitar duplicação
-                    const newBtn = btn.cloneNode(true); // Clonar o botão para evitar eventos duplicados
+                    const newBtn = btn.cloneNode(true); // Clonar para evitar eventos duplicados
                     btn.parentNode.replaceChild(newBtn, btn);
                     newBtn.addEventListener('click', toggleAttribute);
                 });
@@ -1243,46 +1336,115 @@
 
 
         function showEditForm(index) {
-            // Ocultar todos os formulários de edição
+            // Ocultar todos os formulários de edição e mostrar conteúdos
             document.querySelectorAll('.edit-form').forEach(form => form.style.display = 'none');
             document.querySelectorAll('.task-content').forEach(content => content.style.display = 'block');
             document.querySelectorAll('.task-card').forEach(card => card.classList.remove('edit-mode'));
-            
+        
             // Mostrar o formulário de edição do card clicado
             const form = document.getElementById(`edit-form-${index}`);
             const content = document.querySelectorAll('.task-content')[index];
             const card = form.closest('.task-card');
+            if (!form || !content || !card) {
+                console.error(`Erro: Elementos não encontrados para index ${index}`);
+                showToast('Erro ao abrir formulário de edição.');
+                return;
+            }
             form.style.display = 'flex';
             content.style.display = 'none';
             card.classList.add('edit-mode');
+        
+            // Limpar eventos antigos e adicionar novos aos botões de atributos
+            const attributeButtons = form.querySelectorAll('.attribute-btn');
+            attributeButtons.forEach(btn => {
+                const attribute = btn.getAttribute('data-attribute');
+                const isSelected = tasks[index].attributes.includes(attribute);
+                btn.classList.toggle('selected', isSelected); // Garantir estado correto
+                const newBtn = btn.cloneNode(true); // Clonar para evitar eventos duplicados
+                btn.parentNode.replaceChild(newBtn, btn);
+                newBtn.addEventListener('click', toggleAttribute);
+            });
         }
         
         function saveTaskEdit(index) {
-            const name = document.getElementById(`edit-task-name-${index}`).value.trim();
-            const category = document.getElementById(`edit-task-category-${index}`).value;
-            const typeDisplay = document.getElementById(`edit-task-type-${index}`).value;
-            const difficulty = parseFloat(document.getElementById(`edit-task-difficulty-${index}`).value);
-            const attributes = Array.from(document.getElementById(`edit-form-${index}`).querySelectorAll('.attribute-btn.selected')).map(btn => btn.getAttribute('data-attribute'));
+            try {
+                const nameInput = document.getElementById(`edit-task-name-${index}`);
+                const categoryInput = document.getElementById(`edit-task-category-${index}`);
+                const typeInput = document.getElementById(`edit-task-type-${index}`);
+                const difficultyInput = document.getElementById(`edit-task-difficulty-${index}`);
+                const form = document.getElementById(`edit-form-${index}`);
         
-            console.log(`Salvando task ${index}: Nome=${name}, Categoria=${category}, Tipo=${typeDisplay}, Dificuldade=${difficulty}, Atributos=${attributes}`);
+                if (!nameInput || !categoryInput || !typeInput || !difficultyInput || !form) {
+                    console.error(`Erro: Elementos do formulário não encontrados para index ${index}`);
+                    showToast('Erro ao salvar: formulário inválido.');
+                    return;
+                }
         
-            if (!name) return showToast('Insira o nome da task.');
-            if (!category) return showToast('Selecione uma categoria.');
-            if (attributes.length === 0) return showToast('Selecione pelo menos um atributo.');
+                const name = nameInput.value.trim();
+                const category = categoryInput.value;
+                const typeDisplay = typeInput.value;
+                const difficulty = parseFloat(difficultyInput.value);
+                const selectedButtons = form.querySelectorAll('.attribute-buttons .attribute-btn.selected');
+                const attributes = Array.from(new Set(
+                    Array.from(selectedButtons).map(btn => btn.getAttribute('data-attribute'))
+                ));
         
-            tasks[index] = {
-                ...tasks[index],
-                name,
-                category,
-                type: typeDisplay === 'Diário' ? 'daily' : typeDisplay === 'Semanal' ? 'weekly' : 'one-time',
-                difficulty,
-                attributes
-            };
+                // Validações
+                if (!name) {
+                    showToast('Insira o nome da task.');
+                    return;
+                }
+                if (!category) {
+                    showToast('Selecione uma categoria.');
+                    return;
+                }
+                if (attributes.length === 0) {
+                    showToast('Selecione pelo menos um atributo.');
+                    return;
+                }
+                if (isNaN(difficulty)) {
+                    showToast('Selecione uma dificuldade válida.');
+                    return;
+                }
         
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            updateTasksGrid();
-            updateMissions(currentCategory);
-            showToast('Task editada com sucesso!');
+                // Atualizar a tarefa
+                tasks[index] = {
+                    ...tasks[index],
+                    name,
+                    category,
+                    type: typeDisplay === 'Diário' ? 'daily' : typeDisplay === 'Semanal' ? 'weekly' : 'one-time',
+                    difficulty,
+                    attributes
+                };
+        
+                // Salvar no localStorage
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+        
+                // Atualizar a interface
+                updateTasksGrid();
+                updateMissions(currentCategory);
+                cancelTaskEdit(index); // Fechar o formulário
+                showToast('Task editada com sucesso!');
+            } catch (error) {
+                console.error('Erro ao salvar tarefa:', error);
+                showToast('Erro ao salvar tarefa. Veja o console para detalhes.');
+            }
+        }
+     
+        function showSave() {
+            try {
+                // Usar a função showSection para exibir a seção correta
+                showSection('save-container');
+                
+                // Atualizar os slots de salvamento
+                updateSaveSlots();
+                
+                console.log('Aba de Salvar/Carregar aberta com sucesso.');
+                showToast('Aba de Salvar/Carregar aberta.');
+            } catch (error) {
+                console.error('Erro ao abrir aba de Salvar/Carregar:', error);
+                showToast('Erro ao abrir aba de Salvar/Carregar. Veja o console para detalhes.');
+            }
         }
         
         function cancelTaskEdit(index) {
@@ -1390,11 +1552,24 @@
             grid.innerHTML = '';
             let filteredTasks = tasks.filter(task => !task.completed);
             if (category !== 'all') filteredTasks = filteredTasks.filter(task => task.category === category);
-            const attributeIcons = { Força: 'fas fa-dumbbell', Inteligência: 'fas fa-brain', Vitalidade: 'fas fa-heart', Sabedoria: 'fas fa-book', Destreza: 'fas fa-running', Humor: 'fas fa-smile' };
+            const attributeIcons = {
+                Força: 'fas fa-dumbbell',
+                Inteligência: 'fas fa-brain',
+                Vitalidade: 'fas fa-heart',
+                Sabedoria: 'fas fa-book',
+                Destreza: 'fas fa-running',
+                Humor: 'fas fa-smile'
+            };
             filteredTasks.forEach((task, index) => {
                 const taskIndex = tasks.indexOf(task);
                 const displayType = task.type === 'daily' ? 'Diário' : task.type === 'weekly' ? 'Semanal' : 'Única';
-                const attributesHtml = task.attributes.map(attr => `<i class="${attributeIcons[attr]}" title="${attr}"></i>`).join('');
+                const uniqueAttributes = Array.from(new Set(task.attributes)); // Garantir atributos únicos
+                const attributesHtml = uniqueAttributes.map(attr => {
+                    if (attributeIcons[attr]) {
+                        return `<i class="${attributeIcons[attr]}" title="${attr}"></i>`;
+                    }
+                    return ''; // Ignorar atributos inválidos
+                }).join('');
                 const card = document.createElement('div');
                 card.className = 'mission-card';
                 card.innerHTML = `
@@ -1529,11 +1704,76 @@
         function updateHistory() {
             const tableBody = document.getElementById('history-table-body');
             tableBody.innerHTML = '';
-            completedTasks.forEach(task => {
+            
+            // Calcular o número total de páginas
+            const totalPages = Math.ceil(completedTasks.length / itemsPerPage);
+            
+            // Garantir que currentPage esteja dentro dos limites
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            
+            // Filtrar tarefas para a página atual
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedTasks = completedTasks.slice(startIndex, endIndex);
+            
+            // Preencher a tabela com as tarefas da página atual
+            paginatedTasks.forEach(task => {
                 const row = document.createElement('tr');
                 row.innerHTML = `<td>${task.name}</td><td>${task.category}</td><td>${task.type}</td><td>${task.progress}%</td><td>${task.completedDate}</td>`;
                 tableBody.appendChild(row);
             });
+            
+            // Atualizar os controles de paginação
+            updatePaginationControls(totalPages);
+        }
+        
+        function updatePaginationControls(totalPages) {
+            const paginationContainer = document.getElementById('pagination-controls');
+            paginationContainer.innerHTML = '';
+            
+            // Botão "Início"
+            const firstBtn = document.createElement('button');
+            firstBtn.className = 'pagination-btn';
+            firstBtn.innerHTML = '<i class="fas fa-angle-double-left"></i>';
+            firstBtn.title = 'Primeira Página';
+            firstBtn.disabled = currentPage === 1;
+            firstBtn.onclick = () => {
+                currentPage = 1;
+                updateHistory();
+            };
+            paginationContainer.appendChild(firstBtn);
+            
+            // Calcular quais números de página exibir (máximo de 5 botões)
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+            
+            // Adicionar botões de página
+            for (let i = startPage; i <= endPage; i++) {
+                const btn = document.createElement('button');
+                btn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+                btn.textContent = i;
+                btn.onclick = () => {
+                    currentPage = i;
+                    updateHistory();
+                };
+                paginationContainer.appendChild(btn);
+            }
+            
+            // Botão "Fim"
+            const lastBtn = document.createElement('button');
+            lastBtn.className = 'pagination-btn';
+            lastBtn.innerHTML = '<i class="fas fa-angle-double-right"></i>';
+            lastBtn.title = 'Última Página';
+            lastBtn.disabled = currentPage === totalPages;
+            lastBtn.onclick = () => {
+                currentPage = totalPages;
+                updateHistory();
+            };
+            paginationContainer.appendChild(lastBtn);
         }
 
         function saveSettings() {
@@ -1904,16 +2144,13 @@
             if (!confirm('Tem certeza que deseja apagar todo o histórico? Essa ação não pode ser desfeita.')) return;
             completedTasks = [];
             localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            currentPage = 1; // Resetar a página atual
             if (currentHistoryView === 'table') {
                 updateHistory();
             } else {
                 updateTaskTotals();
             }
             showToast('Histórico apagado!');
-        }
-        function showSave() {
-            showSection('save-container');
-            updateSaveSlots();
         }
         
         function updateSaveSlots() {
@@ -2133,6 +2370,7 @@
 
         function showHistoryView(view) {
             currentHistoryView = view;
+            currentPage = 1; // Resetar a página ao mudar de visualização
             document.getElementById('history-table-view').style.display = view === 'table' ? 'block' : 'none';
             document.getElementById('task-total-view').style.display = view === 'total' ? 'block' : 'none';
             document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -2197,20 +2435,16 @@
 
         function deleteTaskHistory(taskName) {
             if (!confirm(`Excluir todas as entradas de "${taskName}" do histórico? Essa ação não pode ser desfeita.`)) return;
-            // Filtrar completedTasks para remover todas as entradas com o nome da tarefa
             completedTasks = completedTasks.filter(task => task.name !== taskName);
-            // Filtrar chartData para remover entradas correspondentes (se necessário)
             chartData = chartData.filter(task => task.name !== taskName);
-            // Salvar as alterações no localStorage
             localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
             localStorage.setItem('chartData', JSON.stringify(chartData));
-            // Atualizar a visualização
+            currentPage = 1; // Resetar a página atual
             if (currentHistoryView === 'table') {
                 updateHistory();
             } else {
                 updateTaskTotals();
             }
-            // Atualizar gráficos, pois chartData foi alterado
             updateCharts();
             showToast(`Histórico de "${taskName}" apagado!`);
         }
@@ -2231,6 +2465,9 @@
         window.addEventListener('resize', () => {
             updateCharts();
         });
+        
+        
     </script>
+    
 </body>
 </html>
