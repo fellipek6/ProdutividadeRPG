@@ -1208,10 +1208,11 @@
         <div class="missions-grid" id="attribute-progress"></div>
         <div class="charts-container">
             <div><h3>Gráfico de XP Semanal</h3><canvas id="xp-chart-bar" width="400" height="300"></canvas></div>
-            <div><h3>Tasks Concluídas (Mensal)</h3><canvas id="tasks-chart-monthly" width="400" height="300"></canvas></div>
-            <div><h3>Tasks Concluídas (Anual)</h3><canvas id="tasks-chart-yearly" width="400" height="300"></canvas></div>
+            <div><h3>Gráfico de XP (30 dias)</h3><canvas id="xp-monthly-chart" width="400" height="300"></canvas></div>
+            <div><h3>Gráfico de XP (Anual)</h3><canvas id="tasks-chart-yearly" width="400" height="300"></canvas></div>
             <div><h3>Desempenho por Categoria</h3><canvas id="xp-chart-radar" width="400" height="300"></canvas></div>
             <div><h3>Desempenho por Atributo</h3><canvas id="attribute-chart-radar" width="400" height="300"></canvas></div>
+            
         </div>
         <div class="button-container">
             <button class="back-btn" onclick="showMenu()">Voltar ao Menu Principal</button>
@@ -1345,9 +1346,10 @@
         }
 
         function init() {
+            cleanChartData(); // Limpar chartData inválido
             categories.forEach(cat => { if (!xpByCategory[cat]) xpByCategory[cat] = 0; });
             localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
-            localStorage.setItem('chartData', JSON.stringify(chartData)); // Inicializar chartData no localStorage
+            localStorage.setItem('chartData', JSON.stringify(chartData));
             updateCategorySelect();
             updateCategoryCards();
             updateTasksGrid();
@@ -1487,10 +1489,13 @@
             if (task.type !== 'daily') return showToast('Apenas tasks diárias podem ser canceladas.');
             task.completed = true;
             task.lastCompleted = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-            // Remover a linha que adiciona ao completedTasks
-            // completedTasks.push({ ...task, type: 'Diário', completedDate: task.lastCompleted });
+            const displayType = 'Diário';
+            const completedDate = task.lastCompleted;
+            completedTasks.push({ ...task, type: displayType, completedDate, points: 0 });
+            chartData.push({ ...task, type: displayType, completedDate, points: 0 });
             localStorage.setItem('tasks', JSON.stringify(tasks));
             localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            localStorage.setItem('chartData', JSON.stringify(chartData));
             updateMissions('all');
             updateTasksGrid();
             updateHistory();
@@ -1843,13 +1848,14 @@
             const displayType = task.type === 'daily' ? 'Diário' : task.type === 'weekly' ? 'Semanal' : 'Única';
             const basePoints = task.type === 'daily' ? xpDaily : task.type === 'weekly' ? xpWeekly : xpOneTime;
             const multiplier = task.difficulty === 1 ? difficultyMultipliers.easy : task.difficulty === 1.5 ? difficultyMultipliers.medium : difficultyMultipliers.hard;
-            const progressFactor = task.progress / 100; 
+            const progressFactor = task.progress / 100;
             const points = Math.round(basePoints * multiplier * progressFactor * (1 + streak * 0.05));
-            
+            const completedDate = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+        
             // Adicionar a completedTasks para a tabela de histórico
-            completedTasks.push({ ...task, type: displayType, completedDate: new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }), points });
+            completedTasks.push({ ...task, type: displayType, completedDate, points });
             // Adicionar a chartData para os gráficos
-            chartData.push({ ...task, type: displayType, completedDate: new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) });
+            chartData.push({ ...task, type: displayType, completedDate, points });
             xp += points;
             xpByCategory[task.category] = (xpByCategory[task.category] || 0) + points;
             const pointsPerAttribute = task.attributes.length > 0 ? Math.floor(points / task.attributes.length) : 0;
@@ -1860,7 +1866,7 @@
             if (task.type === 'daily') {
                 dailyCount++;
                 task.completed = true;
-                task.lastCompleted = today.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+                task.lastCompleted = completedDate;
             } else if (task.type === 'weekly') {
                 task.completed = true;
             } else {
@@ -1877,7 +1883,7 @@
             localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
             localStorage.setItem('attributesPoints', JSON.stringify(attributesPoints));
             localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
-            localStorage.setItem('chartData', JSON.stringify(chartData)); // Salvar chartData no localStorage
+            localStorage.setItem('chartData', JSON.stringify(chartData));
             showToast(`+${points} XP!`);
             updateMissions(currentCategory);
             updateTasksGrid();
@@ -2196,182 +2202,256 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        function updateCharts() {
-            const isLightTheme = document.body.classList.contains('light-theme');
-            const backgroundColor = isLightTheme ? 'rgba(66, 165, 245, 0.5)' : 'rgba(171, 71, 188, 0.5)';
-            const borderColor = isLightTheme ? '#007bff' : '#ab47bc';
-            const fontColor = isLightTheme ? '#333' : '#ffffff';
-            if (charts.xpChartBar) charts.xpChartBar.destroy();
-            charts.xpChartBar = new Chart(document.getElementById('xp-chart-bar'), {
-                type: 'bar',
-                data: { labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'], datasets: [{ label: 'XP Semanal', data: xpHistory, backgroundColor, borderColor, borderWidth: 1 }] },
-                options: {
-                    scales: {
-                        y: { beginAtZero: true, ticks: { color: fontColor } },
-                        x: { ticks: { color: fontColor } }
-                    },
-                    plugins: { legend: { labels: { color: fontColor } } }
-                }
-            });
-            const monthlyTasks = Array(30).fill(0);
-            const yearlyTasks = Array(12).fill(0);
-            const today = new Date();
-            const currentYear = today.getFullYear();
-            chartData.forEach(task => { // Alterado de completedTasks para chartData
-                const taskDate = new Date(task.completedDate.split('/').reverse().join('-'));
-                const diffDays = Math.floor((today - taskDate) / (1000 * 60 * 60 * 24));
-                if (diffDays < 30) monthlyTasks[29 - diffDays]++;
-                const taskYear = taskDate.getFullYear();
-                const taskMonth = taskDate.getMonth();
-                if (taskYear === currentYear) {
-                    yearlyTasks[taskMonth]++;
-                } else if (taskYear === currentYear - 1) {
-                    const monthsDiff = 12 - taskDate.getMonth() + today.getMonth();
-                    if (monthsDiff < 12) {
-                        yearlyTasks[taskMonth]++;
-                    }
-                }
-            });
-            if (charts.tasksChartMonthly) charts.tasksChartMonthly.destroy();
-            charts.tasksChartMonthly = new Chart(document.getElementById('tasks-chart-monthly'), {
-                type: 'line',
-                data: { labels: Array.from({ length: 30 }, (_, i) => `${29 - i} dias atrás`), datasets: [{ label: 'Tasks Concluídas (Mensal)', data: monthlyTasks, backgroundColor, borderColor, fill: false, tension: 0.1 }] },
-                options: {
-                    scales: {
-                        y: { beginAtZero: true, ticks: { color: fontColor } },
-                        x: { ticks: { color: fontColor } }
-                    },
-                    plugins: { legend: { labels: { color: fontColor } } }
-                }
-            });
-            if (charts.tasksChartYearly) charts.tasksChartYearly.destroy();
-            charts.tasksChartYearly = new Chart(document.getElementById('tasks-chart-yearly'), {
-                type: 'bar',
-                data: {
-                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-                    datasets: [{ label: 'Tasks Concluídas (Anual)', data: yearlyTasks, backgroundColor, borderColor, borderWidth: 1 }]
-                },
-                options: {
-                    scales: {
-                        y: { beginAtZero: true, ticks: { color: fontColor } },
-                        x: { ticks: { color: fontColor } }
-                    },
-                    plugins: { legend: { labels: { color: fontColor } } }
-                }
-            });
-            if (charts.xpChartRadar) charts.xpChartRadar.destroy();
-            charts.xpChartRadar = new Chart(document.getElementById('xp-chart-radar'), {
-                type: 'radar',
-                data: { 
-                    labels: categories, 
-                    datasets: [{ 
-                        label: 'XP por Categoria', 
-                        data: categories.map(cat => Math.floor(xpByCategory[cat] || 0)), 
-                        backgroundColor: 'transparent', 
-                        borderColor, 
-                        borderWidth: 1 
-                    }]
-                },
-                options: {
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            ticks: { color: fontColor, backdropColor: 'transparent' },
-                            pointLabels: { color: fontColor },
-                            grid: { color: isLightTheme ? '#ccc' : '#555' },
-                            angleLines: { color: isLightTheme ? '#ccc' : '#555' }
-                        }
-                    },
-                    plugins: { legend: { labels: { color: fontColor } } }
-                }
-            });
-            if (charts.attributeChartRadar) charts.attributeChartRadar.destroy();
-            charts.attributeChartRadar = new Chart(document.getElementById('attribute-chart-radar'), {
-                type: 'radar',
-                data: { 
-                    labels: Object.keys(attributesPoints), 
-                    datasets: [{ 
-                        label: 'XP por Atributo', 
-                        data: Object.values(attributesPoints).map(x => Math.floor(x)), 
-                        backgroundColor: 'transparent', 
-                        borderColor, 
-                        borderWidth: 1 
-                    }]
-                },
-                options: {
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            ticks: { color: fontColor, backdropColor: 'transparent' },
-                            pointLabels: { color: fontColor },
-                            grid: { color: isLightTheme ? '#ccc' : '#555' },
-                            angleLines: { color: isLightTheme ? '#ccc' : '#555' }
-                        }
-                    },
-                    plugins: { legend: { labels: { color: fontColor } } }
-                }
-            });
-            if (charts.xpChartRadar) charts.xpChartRadar.destroy();
-            charts.xpChartRadar = new Chart(document.getElementById('xp-chart-radar'), {
-                type: 'radar',
-                data: { 
-                    labels: categories, 
-                    datasets: [{ 
-                        label: 'XP por Categoria', 
-                        data: categories.map(cat => Math.floor(xpByCategory[cat] || 0)), 
-                        backgroundColor: 'transparent', 
-                        borderColor, 
-                        borderWidth: 1 
-                    }]
-                },
-                options: {
-                  scales: {
-                      r: {
-                          beginAtZero: true,
-                          ticks: { color: fontColor, backdropColor: 'transparent' }, // Cor da fonte dos ticks e fundo transparente
-                          pointLabels: { color: fontColor }, // Cor das labels dos pontos (categorias)
-                          grid: { color: isLightTheme ? '#ccc' : '#555' }, // Cor da grade
-                          angleLines: { color: isLightTheme ? '#ccc' : '#555' } // Cor das linhas angulares
-                      }
-                  },
-                  plugins: {
-                      legend: {
-                          labels: { color: fontColor } // Cor da fonte da legenda
-                      }
-                  }
-              }
-            });
-            if (charts.attributeChartRadar) charts.attributeChartRadar.destroy();
-            charts.attributeChartRadar = new Chart(document.getElementById('attribute-chart-radar'), {
-                type: 'radar',
-                data: { 
-                    labels: Object.keys(attributesPoints), 
-                    datasets: [{ 
-                        label: 'XP por Atributo', 
-                        data: Object.values(attributesPoints).map(x => Math.floor(x)), 
-                        backgroundColor: 'transparent', 
-                        borderColor, 
-                        borderWidth: 1 
-                    }]
-                },
-                options: {
-                  scales: {
-                      r: {
-                          beginAtZero: true,
-                          ticks: { color: fontColor, backdropColor: 'transparent' }, // Cor da fonte dos ticks e fundo transparente
-                          pointLabels: { color: fontColor }, // Cor das labels dos pontos (atributos)
-                          grid: { color: isLightTheme ? '#ccc' : '#555' }, // Cor da grade
-                          angleLines: { color: isLightTheme ? '#ccc' : '#555' } // Cor das linhas angulares
-                      }
-                  },
-                  plugins: {
-                      legend: {
-                          labels: { color: fontColor } // Cor da fonte da legenda
-                      }
-                  }
-              }
-            });
+function updateCharts() {
+    const isLightTheme = document.body.classList.contains('light-theme');
+    const backgroundColor = isLightTheme ? 'rgba(66, 165, 245, 0.5)' : 'rgba(171, 71, 188, 0.5)';
+    const borderColor = isLightTheme ? '#007bff' : '#ab47bc';
+    const fontColor = isLightTheme ? '#333' : '#ffffff';
+
+    console.log('xpHistory:', xpHistory);
+
+    // Gráfico de XP Semanal
+    if (charts.xpChartBar) charts.xpChartBar.destroy();
+    charts.xpChartBar = new Chart(document.getElementById('xp-chart-bar'), {
+        type: 'bar',
+        data: {
+            labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+            datasets: [{
+                label: 'XP Semanal',
+                data: xpHistory,
+                backgroundColor,
+                borderColor,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true, ticks: { color: fontColor } },
+                x: { ticks: { color: fontColor } }
+            },
+            plugins: { legend: { labels: { color: fontColor } } }
         }
+    });
+
+    // Dados para os gráficos de Tasks Mensal, Anual e XP Mensal
+    const monthlyTasks = Array(30).fill(0);
+    const yearlyTasks = Array(12).fill(0);
+    const monthlyXP = Array(30).fill(0);
+    const today = new Date();
+    const currentYear = today.getFullYear();
+
+    console.log('chartData completo:', chartData);
+
+    // Filtrar tarefas válidas
+    const validChartData = chartData.filter((task, index) => {
+        if (!task.completedDate || task.points === undefined || task.points < 0 || isNaN(task.points)) {
+            console.warn(`Tarefa ${index} inválida:`, task);
+            return false;
+        }
+        const [day, month, year] = task.completedDate.split('/');
+        const taskDate = new Date(`${year}-${month}-${day}`);
+        if (isNaN(taskDate.getTime())) {
+            console.warn(`Data inválida para tarefa ${index}:`, task.completedDate);
+            return false;
+        }
+        return true;
+    });
+
+    validChartData.forEach((task, index) => {
+        console.log(`Tarefa ${index}:`, {
+            completedDate: task.completedDate,
+            points: task.points,
+            hasDate: !!task.completedDate,
+            hasPoints: task.points !== undefined && task.points >= 0
+        });
+
+        const [day, month, year] = task.completedDate.split('/');
+        const taskDate = new Date(`${year}-${month}-${day}`);
+
+        const diffDays = Math.floor((today - taskDate) / (1000 * 60 * 60 * 24));
+        const taskYear = taskDate.getFullYear();
+        const taskMonth = taskDate.getMonth();
+
+        if (diffDays >= 0 && diffDays < 30) {
+            const indexXP = 29 - diffDays;
+            monthlyXP[indexXP] += Number(task.points) || 0;
+            monthlyTasks[indexXP]++;
+            console.log(`Adicionado ${task.points} XP à posição ${indexXP} (diffDays: ${diffDays})`);
+        }
+
+        if (taskYear === currentYear) {
+            yearlyTasks[taskMonth]++;
+        } else if (taskYear === currentYear - 1) {
+            const monthsDiff = 12 - taskDate.getMonth() + today.getMonth();
+            if (monthsDiff < 12) {
+                yearlyTasks[taskMonth]++;
+            }
+        }
+    });
+
+    console.log('monthlyXP:', monthlyXP);
+    if (monthlyXP.every(x => x === 0)) {
+        console.log('Nenhum XP registrado nos últimos 30 dias. Verifique se há tarefas concluídas recentes com points >= 0.');
+    }
+
+    // Dados para o gráfico de XP Anual
+    const yearlyXP = Array(12).fill(0);
+    
+    // Preencher yearlyXP a partir de validChartData
+    validChartData.forEach((task) => {
+        const [day, month, year] = task.completedDate.split('/');
+        const taskDate = new Date(`${year}-${month}-${day}`);
+        const taskYear = taskDate.getFullYear();
+        const taskMonth = taskDate.getMonth();
+    
+        if (taskYear === currentYear) {
+            yearlyXP[taskMonth] += Number(task.points) || 0;
+        } else if (taskYear === currentYear - 1) {
+            const monthsDiff = 12 - taskDate.getMonth() + today.getMonth();
+            if (monthsDiff < 12) {
+                yearlyXP[taskMonth] += Number(task.points) || 0;
+            }
+        }
+    });
+    
+    // Gráfico de XP Anual
+    if (charts.tasksChartYearly) charts.tasksChartYearly.destroy();
+    charts.tasksChartYearly = new Chart(document.getElementById('tasks-chart-yearly'), {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+            datasets: [{
+                label: 'XP Anual',
+                data: yearlyXP,
+                backgroundColor,
+                borderColor,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true, ticks: { color: fontColor } },
+                x: { ticks: { color: fontColor } }
+            },
+            plugins: { legend: { labels: { color: fontColor } } }
+        }
+    });
+
+    // Gráfico de XP por Categoria (Radar)
+    if (charts.xpChartRadar) charts.xpChartRadar.destroy();
+    charts.xpChartRadar = new Chart(document.getElementById('xp-chart-radar'), {
+        type: 'radar',
+        data: {
+            labels: categories,
+            datasets: [{
+                label: 'XP por Categoria',
+                data: categories.map(cat => Math.floor(xpByCategory[cat] || 0)),
+                backgroundColor: 'transparent',
+                borderColor,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    ticks: { color: fontColor, backdropColor: 'transparent' },
+                    pointLabels: { color: fontColor },
+                    grid: { color: isLightTheme ? '#ccc' : '#555' },
+                    angleLines: { color: isLightTheme ? '#ccc' : '#555' }
+                }
+            },
+            plugins: { legend: { labels: { color: fontColor } } }
+        }
+    });
+
+    // Gráfico de XP por Atributo (Radar)
+    if (charts.attributeChartRadar) charts.attributeChartRadar.destroy();
+    charts.attributeChartRadar = new Chart(document.getElementById('attribute-chart-radar'), {
+        type: 'radar',
+        data: {
+            labels: Object.keys(attributesPoints),
+            datasets: [{
+                label: 'XP por Atributo',
+                data: Object.values(attributesPoints).map(x => Math.floor(x)),
+                backgroundColor: 'transparent',
+                borderColor,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    ticks: { color: fontColor, backdropColor: 'transparent' },
+                    pointLabels: { color: fontColor },
+                    grid: { color: isLightTheme ? '#ccc' : '#555' },
+                    angleLines: { color: isLightTheme ? '#ccc' : '#555' }
+                }
+            },
+            plugins: { legend: { labels: { color: fontColor } } }
+        }
+    });
+
+    // Gráfico de XP Mensal com mensagem se vazio
+    const noDataPlugin = monthlyXP.every(x => x === 0) ? {
+        id: 'noDataMessage',
+        afterDraw: (chart) => {
+            const ctx = chart.ctx;
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = '16px Arial';
+            ctx.fillStyle = fontColor;
+            ctx.fillText('Sem dados nos últimos 30 dias', chart.width / 2, chart.height / 2);
+            ctx.restore();
+        }
+    } : {};
+
+    if (charts.xpMonthlyChart) charts.xpMonthlyChart.destroy();
+    charts.xpMonthlyChart = new Chart(document.getElementById('xp-monthly-chart'), {
+        type: 'line',
+        data: {
+            labels: Array.from({ length: 30 }, (_, i) => `${29 - i} dias atrás`),
+            datasets: [{
+                label: 'XP Mensal',
+                data: monthlyXP,
+                backgroundColor,
+                borderColor,
+                borderWidth: 2,
+                fill: false,
+                tension: 0.3
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true, ticks: { color: fontColor } },
+                x: { ticks: { color: fontColor } }
+            },
+            plugins: { legend: { labels: { color: fontColor } } }
+        },
+        plugins: [noDataPlugin]
+    });
+}
+        
+        function cleanChartData() {
+            chartData = chartData.filter(task => {
+                if (!task.completedDate || task.points === undefined || task.points < 0 || isNaN(task.points)) {
+                    console.warn('Removendo tarefa inválida de chartData:', task);
+                    return false;
+                }
+                const [day, month, year] = task.completedDate.split('/');
+                const taskDate = new Date(`${year}-${month}-${day}`);
+                if (isNaN(taskDate.getTime())) {
+                    console.warn('Removendo tarefa com data inválida de chartData:', task.completedDate);
+                    return false;
+                }
+                return true;
+            });
+            localStorage.setItem('chartData', JSON.stringify(chartData));
+        }
+        
+        
         function clearHistory() {
             if (!confirm('Tem certeza que deseja apagar todo o histórico? Essa ação não pode ser desfeita.')) return;
             completedTasks = [];
