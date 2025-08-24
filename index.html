@@ -899,6 +899,218 @@
             color: #007bff;
         }
 
+        /* Estilo para o diálogo de confirmação */
+        .confirmation-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #424242, #212121);
+            padding: clamp(15px, 3vw, 20px);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            border: 2px solid #ffd700;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            gap: clamp(10px, 2vw, 12px);
+            width: clamp(200px, 80vw, 300px);
+            text-align: center;
+            font-size: clamp(12px, 2.5vw, 14px);
+        }
+        body.light-theme .confirmation-dialog {
+            background: linear-gradient(135deg, #e6f0fa, #d9e7f7);
+            border: 2px solid #007bff;
+        }
+        .confirmation-dialog p {
+            margin: 0;
+            color: #e0e0e0;
+        }
+        body.light-theme .confirmation-dialog p {
+            color: #333;
+        }
+        .confirmation-dialog .dialog-buttons {
+            display: flex;
+            justify-content: center;
+            gap: clamp(8px, 2vw, 10px);
+        }
+        .confirmation-dialog button {
+            background: linear-gradient(135deg, #388e3c, #2e7d32);
+            color: #e0e0e0;
+            border: none;
+            padding: clamp(6px, 1.5vw, 8px) clamp(12px, 2.5vw, 15px);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: clamp(10px, 2.2vw, 12px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        body.light-theme .confirmation-dialog button {
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+            color: #333;
+        }
+        .confirmation-dialog button.cancel-btn {
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+        }
+        body.light-theme .confirmation-dialog button.cancel-btn {
+            background: linear-gradient(135deg, #ef5350, #d32f2f);
+        }
+        .confirmation-dialog button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+
+
+        .task-total-card .progress-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 8px;
+            width: 100%;
+        }
+        
+        .task-total-card .progress-bar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .task-total-card .progress-bar-container label {
+            font-size: clamp(9px, 2vw, 10px);
+            color: #e0e0e0;
+        }
+        
+        body.light-theme .task-total-card .progress-bar-container label {
+            color: #333;
+        }
+        
+        .task-total-card .progress-bar-container progress {
+            width: 100%;
+            max-width: 120px;
+            height: 10px;
+            border-radius: 5px;
+            background: #212121;
+            border: 1px solid #ffd700;
+        }
+        
+        body.light-theme .task-total-card .progress-bar-container progress {
+            background: #e6f0fa;
+            border: 1px solid #007bff;
+        }
+        
+        .task-total-card .progress-bar-container progress::-webkit-progress-bar {
+            background: transparent;
+            border-radius: 5px;
+        }
+        
+        .task-total-card .progress-bar-container progress::-webkit-progress-value {
+            background: linear-gradient(135deg, #4b0082, #8a2be2);
+            border-radius: 5px;
+        }
+        
+        body.light-theme .task-total-card .progress-bar-container progress::-webkit-progress-value {
+            background: linear-gradient(135deg, #0288d1, #0277bd);
+        }
+        
+        .task-total-card .progress-bar-container progress::-moz-progress-bar {
+            background: linear-gradient(135deg, #4b0082, #8a2be2);
+            border-radius: 5px;
+        }
+        
+        body.light-theme .task-total-card .progress-bar-container progress::-moz-progress-bar {
+            background: linear-gradient(135deg, #0288d1, #0277bd);
+        }
+
+
+        /* Estilo para o botão Resetar Task */
+        .reset-task-btn {
+            background: linear-gradient(135deg, #ffb300, #ff8f00); /* Amarelo para tema escuro */
+            color: #e0e0e0;
+            border: none;
+            padding: clamp(10px, 2vw, 12px) clamp(20px, 4vw, 24px);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-size: clamp(12px, 2.5vw, 14px);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            justify-content: center;
+            width: clamp(150px, 30vw, 180px);
+        }
+        body.light-theme .reset-task-btn {
+            background: linear-gradient(135deg, #ffca28, #ffb300); /* Amarelo mais claro para tema claro */
+            color: #333;
+        }
+        .reset-task-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        
+        /* Estilo para o diálogo de reset */
+        .reset-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #424242, #212121);
+            padding: clamp(15px, 3vw, 20px);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            border: 2px solid #ffd700;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            gap: clamp(10px, 2vw, 12px);
+            width: clamp(200px, 80vw, 300px);
+            text-align: center;
+            font-size: clamp(12px, 2.5vw, 14px);
+        }
+        body.light-theme .reset-dialog {
+            background: linear-gradient(135deg, #e6f0fa, #d9e7f7);
+            border: 2px solid #007bff;
+        }
+        .reset-dialog p {
+            margin: 0;
+            color: #e0e0e0;
+        }
+        body.light-theme .reset-dialog p {
+            color: #333;
+        }
+        .reset-dialog .dialog-buttons {
+            display: flex;
+            justify-content: center;
+            gap: clamp(8px, 2vw, 10px);
+            flex-wrap: wrap;
+        }
+        .reset-dialog button {
+            background: linear-gradient(135deg, #388e3c, #2e7d32);
+            color: #e0e0e0;
+            border: none;
+            padding: clamp(6px, 1.5vw, 8px) clamp(12px, 2.5vw, 15px);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: clamp(10px, 2.2vw, 12px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        body.light-theme .reset-dialog button {
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+            color: #333;
+        }
+        .reset-dialog button.cancel-btn {
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+        }
+        body.light-theme .reset-dialog button.cancel-btn {
+            background: linear-gradient(135deg, #ef5350, #d32f2f);
+        }
+        .reset-dialog button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+
 
 
     </style>
@@ -931,12 +1143,15 @@
         <progress id="global-xp" value="0" max="100"></progress>
         <span id="xp-label">XP: 0 / 100 (Nível 1)</span>
     </div>
-    <div class="container main-menu" id="main-menu" style="display: none;">
-        <h2>Bem-vindo ao RPG de Produtividade!</h2>
-        <p>Complete tasks, ganhe XP e suba de nível!</p>
-        <div class="category-select" id="category-select"></div>
-        <div class="missions-grid" id="missions-grid"></div>
-    </div>
+      <div class="container main-menu" id="main-menu" style="display: none;">
+          <h2>Bem-vindo ao RPG de Produtividade!</h2>
+          <p>Complete tasks, ganhe XP e suba de nível!</p>
+          <div class="category-select" id="category-select"></div>
+          <div class="missions-grid" id="missions-grid"></div>
+          <div class="button-container">
+              <button class="reset-task-btn" onclick="showResetDialog()"><i class="fas fa-redo"></i> Resetar Task</button>
+          </div>
+      </div>
     <div class="container tasks-section" id="tasks-container" style="display: none;">
         <h2>Cadastrar e Gerenciar Tasks</h2>
         <div class="form-container">
@@ -1071,8 +1286,25 @@
                 <p id="file-name" class="file-name">Nenhum arquivo selecionado</p>
                 <button class="icon-btn submit-btn" onclick="importSaveData()" id="submit-file" style="display: none;"><i class="fas fa-check"></i> Enviar</button>
             </div>
+        <div class="confirmation-dialog" id="confirmation-dialog">
+            <p>Salvar o jogo no Slot <span id="slot-number"></span>? Isso substituirá os dados existentes.</p>
+            <div class="dialog-buttons">
+                <button onclick="confirmSave()">Confirmar</button>
+                <button class="cancel-btn" onclick="cancelSave()">Cancelar</button>
+            </div>
+        </div>
         </div>
     <div class="toast" id="toast"></div>
+    
+    <div class="reset-dialog" id="reset-dialog">
+        <p>Escolha o tipo de tasks para resetar:</p>
+        <div class="dialog-buttons">
+            <button onclick="resetTasks('daily')">Diárias</button>
+            <button onclick="resetTasks('weekly')">Semanal</button>
+            <button class="cancel-btn" onclick="closeResetDialog()">Cancelar</button>
+        </div>
+    </div>
+    
     <script>
         let chartData = JSON.parse(localStorage.getItem('chartData')) || [];
         let currentCategory = 'all'; // Adiciona no início do script, junto com outras variáveis globais
@@ -2188,8 +2420,20 @@
             }
         }
         
+        let pendingSlot = null; // Variável para armazenar o slot pendente
+        
         function saveToSlot(slot) {
-            const slotName = `saveSlot${slot}`;
+            pendingSlot = slot; // Armazenar o slot clicado
+            const slotData = JSON.parse(localStorage.getItem(`saveSlot${slot}`)) || null;
+            const dialog = document.getElementById('confirmation-dialog');
+            const slotNumberDisplay = document.getElementById('slot-number');
+            slotNumberDisplay.textContent = slot + 1;
+            dialog.style.display = 'flex';
+        }
+        
+        function confirmSave() {
+            if (pendingSlot === null) return;
+            const slotName = `saveSlot${pendingSlot}`;
             const saveData = {
                 timestamp: new Date().toISOString(),
                 tasks,
@@ -2214,7 +2458,14 @@
             };
             localStorage.setItem(slotName, JSON.stringify(saveData));
             updateSaveSlots();
-            showToast(`Jogo salvo no Slot ${slot + 1}!`);
+            showToast(`Jogo salvo no Slot ${pendingSlot + 1}!`);
+            cancelSave(); // Fechar o diálogo após salvar
+        }
+        
+        function cancelSave() {
+            const dialog = document.getElementById('confirmation-dialog');
+            dialog.style.display = 'none';
+            pendingSlot = null; // Resetar o slot pendente
         }
         
         function loadFromSlot(slot) {
@@ -2392,17 +2643,25 @@
         function updateTaskTotals() {
             const grid = document.getElementById('task-total-grid');
             grid.innerHTML = '';
-            
+        
             // Group by task name
             const taskGroups = completedTasks.reduce((acc, task) => {
                 if (!acc[task.name]) {
-                    acc[task.name] = { count: 0, totalXP: 0, type: task.type };
+                    acc[task.name] = { 
+                        count: 0, 
+                        totalXP: 0, 
+                        type: task.type, 
+                        progress: [], // Store all progress values
+                        dates: [] // Store completion dates
+                    };
                 }
                 acc[task.name].count++;
-                acc[task.name].totalXP += task.points || 0; // Use 0 if points not stored (for old data)
+                acc[task.name].totalXP += task.points || 0;
+                acc[task.name].progress.push(task.progress || 0);
+                acc[task.name].dates.push(new Date(task.completedDate.split('/').reverse().join('-')));
                 return acc;
             }, {});
-            
+        
             // Filter based on currentFilter
             const filteredGroups = Object.entries(taskGroups).filter(([name, data]) => {
                 if (currentFilter === 'repetitivo') {
@@ -2411,22 +2670,61 @@
                     return data.type === 'Única';
                 }
             });
-            
-            // Render cards
+        
+            // Calculate averages for each period
+            const today = new Date();
             filteredGroups.forEach(([name, data]) => {
+                // Last 7 days
+                const last7DaysProgress = data.progress.filter((prog, i) => {
+                    const diffDays = Math.floor((today - data.dates[i]) / (1000 * 60 * 60 * 24));
+                    return diffDays <= 7;
+                });
+                const avg7Days = last7DaysProgress.length > 0 
+                    ? (last7DaysProgress.reduce((sum, prog) => sum + prog, 0) / last7DaysProgress.length).toFixed(1) 
+                    : 0;
+        
+                // Last 30 days
+                const last30DaysProgress = data.progress.filter((prog, i) => {
+                    const diffDays = Math.floor((today - data.dates[i]) / (1000 * 60 * 60 * 24));
+                    return diffDays <= 30;
+                });
+                const avg30Days = last30DaysProgress.length > 0 
+                    ? (last30DaysProgress.reduce((sum, prog) => sum + prog, 0) / last30DaysProgress.length).toFixed(1) 
+                    : 0;
+        
+                // Overall
+                const avgOverall = data.progress.length > 0 
+                    ? (data.progress.reduce((sum, prog) => sum + prog, 0) / data.progress.length).toFixed(1) 
+                    : 0;
+        
+                // Render card
                 const card = document.createElement('div');
                 card.className = 'task-total-card';
                 card.innerHTML = `
                     <h4>${name}</h4>
                     <p>Vezes Feita: ${data.count}</p>
                     <p>XP Total: ${data.totalXP}</p>
+                    <div class="progress-bars">
+                        <div class="progress-bar-container">
+                            <label>Últ. 7 Dias: ${avg7Days}%</label>
+                            <progress value="${avg7Days}" max="100"></progress>
+                        </div>
+                        <div class="progress-bar-container">
+                            <label>Últ. 30 Dias: ${avg30Days}%</label>
+                            <progress value="${avg30Days}" max="100"></progress>
+                        </div>
+                        <div class="progress-bar-container">
+                            <label>Geral: ${avgOverall}%</label>
+                            <progress value="${avgOverall}" max="100"></progress>
+                        </div>
+                    </div>
                     <div class="icons">
                         <i class="fas fa-trash" onclick="deleteTaskHistory('${name}')" title="Excluir Task do Histórico"></i>
                     </div>
                 `;
                 grid.appendChild(card);
             });
-            
+        
             if (filteredGroups.length === 0) {
                 grid.innerHTML = '<p>Nenhuma task encontrada.</p>';
             }
@@ -2449,6 +2747,40 @@
             showToast(`Histórico de "${taskName}" apagado!`);
         }
 
+
+        function showResetDialog() {
+            const dialog = document.getElementById('reset-dialog');
+            dialog.style.display = 'flex';
+        }
+        
+        function closeResetDialog() {
+            const dialog = document.getElementById('reset-dialog');
+            dialog.style.display = 'none';
+        }
+        
+        function resetTasks(type) {
+            if (!confirm(`Tem certeza que deseja resetar todas as tasks ${type === 'daily' ? 'diárias' : 'semanais'}? Isso permitirá enviar novos dados.`)) {
+                closeResetDialog();
+                return;
+            }
+        
+            tasks = tasks.map(task => {
+                if (task.type === type) {
+                    return {
+                        ...task,
+                        completed: false,
+                        progress: 0
+                    };
+                }
+                return task;
+            });
+        
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            updateTasksGrid();
+            updateMissions(currentCategory);
+            closeResetDialog();
+            showToast(`Tasks ${type === 'daily' ? 'diárias' : 'semanais'} resetadas!`);
+        }
 
 
         window.addEventListener('load', () => {
