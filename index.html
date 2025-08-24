@@ -526,7 +526,7 @@
             flex-wrap: wrap;
             gap: 12px;
             justify-content: center;
-            overflow-y: hidden;
+            overflow-y: auto;
             overflow-x: hidden; /* Already present, keep it */
             max-height: 400px;
             width: 100%; /* Ensure it takes full width of parent */
@@ -540,7 +540,7 @@
             box-shadow: 0 3px 6px rgba(0,0,0,0.4);
             transition: transform 0.2s;
             flex: 1 1 clamp(140px, 30vw, 160px); /* Keep flexible sizing */
-            max-width: 95%; /* Prevent cards from exceeding container width */
+            max-width: 90%; /* Prevent cards from exceeding container width */
             min-width: 0; /* Allow cards to shrink if needed */
             text-align: center;
             box-sizing: border-box; /* Include padding/borders in width */
@@ -551,7 +551,7 @@
         }
         
         .task-total-card:hover {
-            transform: scale(1.05);
+            transform: scale(0.95);
         }
         
         .task-total-card h4 {
