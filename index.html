@@ -1193,7 +1193,15 @@
     </div>
     <div class="container score-section" id="score-container" style="display: none;">
         <h2>Seu Progresso</h2>
-        <p>XP Total: <span id="xp">0</span> | Nível: <span id="level">1</span></p>
+        <p>XP: <span id="xp">0</span> | Nível: <span id="level">1</span> | Sequência: <span id="streak">0</span> dias</p>
+        <div class="progress-bar">
+            <label>Objetivo Diário (<span id="daily-goal-label">5</span> tasks):</label>
+            <progress id="daily-progress" value="0" max="5"></progress>
+        </div>
+        <div class="progress-bar">
+            <label>Objetivo Semanal (<span id="weekly-goal-label">200</span> XP):</label>
+            <progress id="weekly-progress" value="0" max="200"></progress>
+        </div>
         <h3>Progresso por Categoria</h3>
         <div class="missions-grid" id="category-progress"></div>
         <h3>Progresso por Atributo</h3>
@@ -1255,7 +1263,10 @@
             <div class="form-group"><label for="xp-one-time">XP para Únicas:</label><input type="number" id="xp-one-time" value="20"></div>
             <div class="form-group"><label for="difficulty-easy">Multiplicador Baixa:</label><input type="number" id="difficulty-easy" step="0.1" value="1"></div>
             <div class="form-group"><label for="difficulty-medium">Multiplicador Média:</label><input type="number" id="difficulty-medium" step="0.1" value="1.5"></div>
-            <div class="form-group"><label for="difficulty-hard">Multiplicador Alta:</label><input type="number" id="difficulty-hard" step="0.1" value="2"></div>            <div class="form-group">
+            <div class="form-group"><label for="difficulty-hard">Multiplicador Alta:</label><input type="number" id="difficulty-hard" step="0.1" value="2"></div>
+            <div class="form-group"><label for="daily-goal">Objetivo Diário (tasks):</label><input type="number" id="daily-goal" value="5"></div>
+            <div class="form-group"><label for="weekly-goal">Objetivo Semanal (XP):</label><input type="number" id="weekly-goal" value="200"></div>
+            <div class="form-group">
                 <button class="save-settings-btn" onclick="saveSettings()"><i class="fas fa-save"></i> Salvar Configurações</button>
                 <button class="reset-btn" type="button" onclick="resetAll()"><i class="fas fa-redo"></i> Resetar Tudo</button>
             </div>
@@ -2103,8 +2114,8 @@
             xpWeekly = 50;
             xpOneTime = 20;
             difficultyMultipliers = { easy: 1, medium: 1.5, hard: 2 };
-            dailyGoal = [];
-            weeklyGoal = [];
+            dailyGoal = 5;
+            weeklyGoal = 200;
             completedTasks = [];
             chartData = [];
         
