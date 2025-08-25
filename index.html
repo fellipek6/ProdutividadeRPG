@@ -1113,6 +1113,54 @@
 
 
 
+        .progress-card {
+            background: linear-gradient(135deg, #424242, #212121); /* Gradiente escuro para tema padrão */
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column; /* Layout vertical para itens */
+            gap: 10px;
+            max-width: 300px;
+            margin: 0 auto;
+            cursor: pointer; /* Torna interativo */
+            text-align: center;
+        }
+        
+        body.light-theme .progress-card {
+            background: linear-gradient(135deg, #e6f0fa, #d9e7f7); /* Gradiente claro para tema light */
+        }
+        
+        .progress-card:hover {
+            transform: scale(1.05); /* Aumenta ligeiramente no hover */
+            box-shadow: 0 6px 12px rgba(0,0,0,0.5);
+        }
+        
+        .progress-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: clamp(14px, 3vw, 16px);
+            color: #ffd700; /* Cor dourada para destaque */
+        }
+        
+        body.light-theme .progress-item {
+            color: #007bff; /* Cor azul para tema light */
+        }
+        
+        .progress-item i {
+            font-size: clamp(16px, 4vw, 18px);
+            color: #ff8c00; /* Cor laranja para ícones no hover */
+            transition: color 0.3s;
+        }
+        
+        .progress-card:hover .progress-item i {
+            color: #ffd700; /* Muda cor no hover do card */
+        }
+
+
     </style>
 </head>
 <body>
@@ -1191,9 +1239,22 @@
             <button class="delete-all-btn" onclick="clearAllTasks()" title="Apagar Tasks"><i class="fas fa-trash"></i> Apagar Tasks</button>
         </div>
     </div>
-    <div class="container score-section" id="score-container" style="display: none;">
-        <h2>Seu Progresso</h2>
-        <p>XP Total: <span id="xp">0</span> | Nível: <span id="level">1</span></p>
+      <div class="container score-section" id="score-container" style="display: none;">
+          <h2>Seu Progresso</h2>
+          <div class="progress-card" id="progress-card">
+              <div class="progress-item">
+                  <i class="fas fa-trophy"></i> <!-- Emoji/ícone para Nível (pode usar 🏆) -->
+                  <span>Nível: </span><span id="level">1</span>
+              </div>
+              <div class="progress-item">
+                  <i class="fas fa-star"></i> <!-- Emoji/ícone para XP (pode usar ⭐ se preferir emoji puro) -->
+                  <span>XP Total: </span><span id="xp">0</span>
+              </div>
+              <div class="progress-item">
+                  <i class="fas fa-check-circle"></i> <!-- Emoji/ícone para Tasks Feitas (pode usar ✅) -->
+                  <span>Tasks Feitas: </span><span id="total-tasks">0</span>
+              </div>
+          </div>
         <h3>Progresso por Categoria</h3>
         <div class="missions-grid" id="category-progress"></div>
         <h3>Progresso por Atributo</h3>
@@ -1335,31 +1396,31 @@
             };
         }
 
-      function init() {
-          cleanChartData(); // Limpar chartData inválido
-          categories.forEach(cat => { if (!xpByCategory[cat]) xpByCategory[cat] = 0; });
-          localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
-          localStorage.setItem('chartData', JSON.stringify(chartData));
-          updateCategorySelect();
-          updateCategoryCards();
-          updateTasksGrid();
-          updateMissions('all');
-          updateScore();
-          checkReset();
-          document.getElementById('landing-page').style.display = 'flex';
-          document.getElementById('xp-daily').value = xpDaily;
-          document.getElementById('xp-weekly').value = xpWeekly;
-          document.getElementById('xp-one-time').value = xpOneTime;
-          document.getElementById('difficulty-easy').value = difficultyMultipliers.easy;
-          document.getElementById('difficulty-medium').value = difficultyMultipliers.medium;
-          document.getElementById('difficulty-hard').value = difficultyMultipliers.hard;
-          document.querySelectorAll('.attribute-btn').forEach(btn => btn.addEventListener('click', toggleAttribute));
-          document.getElementById('missions-grid').addEventListener('wheel', (e) => {
-              e.preventDefault();
-              document.getElementById('missions-grid').scrollBy({ top: Math.sign(e.deltaY) * 10, behavior: 'smooth' });
-          });
-          updateSaveSlots();
-      }
+        function init() {
+            cleanChartData(); // Limpar chartData inválido
+            categories.forEach(cat => { if (!xpByCategory[cat]) xpByCategory[cat] = 0; });
+            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
+            localStorage.setItem('chartData', JSON.stringify(chartData));
+            updateCategorySelect();
+            updateCategoryCards();
+            updateTasksGrid();
+            updateMissions('all');
+            updateScore();
+            checkReset();
+            document.getElementById('landing-page').style.display = 'flex';
+            document.getElementById('xp-daily').value = xpDaily;
+            document.getElementById('xp-weekly').value = xpWeekly;
+            document.getElementById('xp-one-time').value = xpOneTime;
+            document.getElementById('difficulty-easy').value = difficultyMultipliers.easy;
+            document.getElementById('difficulty-medium').value = difficultyMultipliers.medium;
+            document.getElementById('difficulty-hard').value = difficultyMultipliers.hard;
+            document.querySelectorAll('.attribute-btn').forEach(btn => btn.addEventListener('click', toggleAttribute));
+            document.getElementById('missions-grid').addEventListener('wheel', (e) => {
+                e.preventDefault();
+                document.getElementById('missions-grid').scrollBy({ top: Math.sign(e.deltaY) * 10, behavior: 'smooth' });
+            });
+            updateSaveSlots();
+        }
 
         function toggleAttribute(event) {
             const btn = event.currentTarget;
@@ -1882,6 +1943,7 @@
         function updateScore() {
             document.getElementById('xp').textContent = Math.floor(xp);
             document.getElementById('level').textContent = level;
+            document.getElementById('total-tasks').textContent = completedTasks.length; // Novo: total de tasks feitas
             document.getElementById('global-xp').value = Math.floor(xp % 100);
             document.getElementById('xp-label').textContent = `XP: ${xp % 100} / 100 (Nível ${level})`;
             updateCategoryProgress();
