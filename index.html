@@ -1193,15 +1193,7 @@
     </div>
     <div class="container score-section" id="score-container" style="display: none;">
         <h2>Seu Progresso</h2>
-        <p>XP: <span id="xp">0</span> | Nível: <span id="level">1</span> | Sequência: <span id="streak">0</span> dias</p>
-        <div class="progress-bar">
-            <label>Objetivo Diário (<span id="daily-goal-label">5</span> tasks):</label>
-            <progress id="daily-progress" value="0" max="5"></progress>
-        </div>
-        <div class="progress-bar">
-            <label>Objetivo Semanal (<span id="weekly-goal-label">200</span> XP):</label>
-            <progress id="weekly-progress" value="0" max="200"></progress>
-        </div>
+        <p>XP Total: <span id="xp">0</span> | Nível: <span id="level">1</span></p>
         <h3>Progresso por Categoria</h3>
         <div class="missions-grid" id="category-progress"></div>
         <h3>Progresso por Atributo</h3>
@@ -1264,8 +1256,6 @@
             <div class="form-group"><label for="difficulty-easy">Multiplicador Baixa:</label><input type="number" id="difficulty-easy" step="0.1" value="1"></div>
             <div class="form-group"><label for="difficulty-medium">Multiplicador Média:</label><input type="number" id="difficulty-medium" step="0.1" value="1.5"></div>
             <div class="form-group"><label for="difficulty-hard">Multiplicador Alta:</label><input type="number" id="difficulty-hard" step="0.1" value="2"></div>
-            <div class="form-group"><label for="daily-goal">Objetivo Diário (tasks):</label><input type="number" id="daily-goal" value="5"></div>
-            <div class="form-group"><label for="weekly-goal">Objetivo Semanal (XP):</label><input type="number" id="weekly-goal" value="200"></div>
             <div class="form-group">
                 <button class="save-settings-btn" onclick="saveSettings()"><i class="fas fa-save"></i> Salvar Configurações</button>
                 <button class="reset-btn" type="button" onclick="resetAll()"><i class="fas fa-redo"></i> Resetar Tudo</button>
@@ -1345,33 +1335,31 @@
             };
         }
 
-        function init() {
-            cleanChartData(); // Limpar chartData inválido
-            categories.forEach(cat => { if (!xpByCategory[cat]) xpByCategory[cat] = 0; });
-            localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
-            localStorage.setItem('chartData', JSON.stringify(chartData));
-            updateCategorySelect();
-            updateCategoryCards();
-            updateTasksGrid();
-            updateMissions('all');
-            updateScore();
-            checkReset();
-            document.getElementById('landing-page').style.display = 'flex';
-            document.getElementById('xp-daily').value = xpDaily;
-            document.getElementById('xp-weekly').value = xpWeekly;
-            document.getElementById('xp-one-time').value = xpOneTime;
-            document.getElementById('difficulty-easy').value = difficultyMultipliers.easy;
-            document.getElementById('difficulty-medium').value = difficultyMultipliers.medium;
-            document.getElementById('difficulty-hard').value = difficultyMultipliers.hard;
-            document.getElementById('daily-goal').value = dailyGoal;
-            document.getElementById('weekly-goal').value = weeklyGoal;
-            document.querySelectorAll('.attribute-btn').forEach(btn => btn.addEventListener('click', toggleAttribute));
-            document.getElementById('missions-grid').addEventListener('wheel', (e) => {
-                e.preventDefault();
-                document.getElementById('missions-grid').scrollBy({ top: Math.sign(e.deltaY) * 10, behavior: 'smooth' });
-            });
-            updateSaveSlots();
-        }
+      function init() {
+          cleanChartData(); // Limpar chartData inválido
+          categories.forEach(cat => { if (!xpByCategory[cat]) xpByCategory[cat] = 0; });
+          localStorage.setItem('xpByCategory', JSON.stringify(xpByCategory));
+          localStorage.setItem('chartData', JSON.stringify(chartData));
+          updateCategorySelect();
+          updateCategoryCards();
+          updateTasksGrid();
+          updateMissions('all');
+          updateScore();
+          checkReset();
+          document.getElementById('landing-page').style.display = 'flex';
+          document.getElementById('xp-daily').value = xpDaily;
+          document.getElementById('xp-weekly').value = xpWeekly;
+          document.getElementById('xp-one-time').value = xpOneTime;
+          document.getElementById('difficulty-easy').value = difficultyMultipliers.easy;
+          document.getElementById('difficulty-medium').value = difficultyMultipliers.medium;
+          document.getElementById('difficulty-hard').value = difficultyMultipliers.hard;
+          document.querySelectorAll('.attribute-btn').forEach(btn => btn.addEventListener('click', toggleAttribute));
+          document.getElementById('missions-grid').addEventListener('wheel', (e) => {
+              e.preventDefault();
+              document.getElementById('missions-grid').scrollBy({ top: Math.sign(e.deltaY) * 10, behavior: 'smooth' });
+          });
+          updateSaveSlots();
+      }
 
         function toggleAttribute(event) {
             const btn = event.currentTarget;
@@ -1894,13 +1882,6 @@
         function updateScore() {
             document.getElementById('xp').textContent = Math.floor(xp);
             document.getElementById('level').textContent = level;
-            document.getElementById('streak').textContent = streak;
-            document.getElementById('daily-progress').max = dailyGoal;
-            document.getElementById('daily-progress').value = dailyCount;
-            document.getElementById('weekly-progress').max = weeklyGoal;
-            document.getElementById('weekly-progress').value = Math.floor(xp % weeklyGoal);
-            document.getElementById('daily-goal-label').textContent = dailyGoal;
-            document.getElementById('weekly-goal-label').textContent = weeklyGoal;
             document.getElementById('global-xp').value = Math.floor(xp % 100);
             document.getElementById('xp-label').textContent = `XP: ${xp % 100} / 100 (Nível ${level})`;
             updateCategoryProgress();
@@ -2021,14 +2002,10 @@
             difficultyMultipliers.easy = parseFloat(document.getElementById('difficulty-easy').value) || 1;
             difficultyMultipliers.medium = parseFloat(document.getElementById('difficulty-medium').value) || 1.5;
             difficultyMultipliers.hard = parseFloat(document.getElementById('difficulty-hard').value) || 2;
-            dailyGoal = parseInt(document.getElementById('daily-goal').value) || 5;
-            weeklyGoal = parseInt(document.getElementById('weekly-goal').value) || 200;
             localStorage.setItem('xpDaily', xpDaily);
             localStorage.setItem('xpWeekly', xpWeekly);
             localStorage.setItem('xpOneTime', xpOneTime);
             localStorage.setItem('difficultyMultipliers', JSON.stringify(difficultyMultipliers));
-            localStorage.setItem('dailyGoal', dailyGoal);
-            localStorage.setItem('weeklyGoal', weeklyGoal);
             updateScore();
             showToast('Configurações salvas!');
         }
